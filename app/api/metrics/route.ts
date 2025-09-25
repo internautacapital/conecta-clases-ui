@@ -18,11 +18,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const courseId = searchParams.get("courseId")
-
-    console.log("courseId", courseId)
-    console.log("searchParams", searchParams)
-
-    console.log("accessToken", accessToken)
+    
     if (!courseId) {
       return NextResponse.json({ error: "courseId parameter is required" }, { status: 400 })
     }
