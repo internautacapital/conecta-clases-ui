@@ -145,7 +145,7 @@ Se añadió un cliente de Google Classroom con OAuth 2.0 en `lib/google.ts` y un
 ### Instalar dependencia
 
 ```bash
-npm install googleapis
+npm install googleapis recharts
 ```
 
 ### Scopes requeridos
@@ -162,12 +162,19 @@ Los scopes necesarios ya están configurados en `lib/auth.ts`:
 
 ### Endpoints disponibles
 - `GET /api/classroom`: retorna los cursos del usuario autenticado (requiere sesión iniciada y permisos aceptados en el consentimiento de Google).
+- `GET /api/notifications`: retorna anuncios de todos los cursos del usuario.
+- `GET /api/metrics?courseId=ID`: retorna métricas semanales de un curso específico.
 
 Ejemplo (una vez autenticado en el navegador):
 
 ```bash
 curl -X GET http://localhost:3000/api/classroom
+curl -X GET http://localhost:3000/api/metrics?courseId=123456
 ```
+
+### Páginas disponibles
+- `/dashboard/progress`: tabla de progreso de estudiantes por curso
+- `/dashboard/metrics`: gráficos de métricas semanales (asistencia, entregas, participación)
 
 ## Próximos Pasos
 
