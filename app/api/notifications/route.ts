@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { setAccessToken, getCourses, getAnnouncements } from "@/lib/google"
+import { getAnnouncements, getCourses, setAccessToken } from "@/lib/google"
+import { getServerSession } from "next-auth"
+import { NextResponse } from "next/server"
 
 export async function GET() {
   try {

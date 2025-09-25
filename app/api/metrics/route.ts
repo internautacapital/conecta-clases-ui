@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
+import { getCourseMetrics } from "@/features/metrics/services/metricsService"
 import { authOptions } from "@/lib/auth"
 import { setAccessToken } from "@/lib/google"
-import { getCourseMetrics } from "@/features/metrics/services/metricsService"
+import { getServerSession } from "next-auth"
+import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,6 +19,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const courseId = searchParams.get("courseId")
 
+    console.log("courseId", courseId)
+    console.log("searchParams", searchParams)
+
+    console.log("accessToken", accessToken)
     if (!courseId) {
       return NextResponse.json({ error: "courseId parameter is required" }, { status: 400 })
     }
