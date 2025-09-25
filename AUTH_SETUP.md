@@ -38,6 +38,8 @@ GOOGLE_CLIENT_SECRET=tu-google-client-secret-aqui
    - **Authorized redirect URIs**: `http://localhost:3000/api/auth/callback/google`
 6. Copia el Client ID y Client Secret a tu archivo `.env.local`
 
+Además, habilita la API de Google Classroom para tu proyecto en Google Cloud Console (APIs & Services > Library > Classroom API > Enable).
+
 ### 4. Generar NEXTAUTH_SECRET
 
 Puedes generar una clave secreta usando:
@@ -134,6 +136,37 @@ function determineUserRole(email: string): 'alumno' | 'profesor' | 'coordinador'
   
   return 'alumno' // Rol por defecto
 }
+```
+
+## Integración con Google Classroom
+
+Se añadió un cliente de Google Classroom con OAuth 2.0 en `lib/google.ts` y un endpoint en `app/api/classroom/route.ts`.
+
+### Instalar dependencia
+
+```bash
+npm install googleapis
+```
+
+### Scopes requeridos
+Los scopes necesarios ya están configurados en `lib/auth.ts`:
+
+- `https://www.googleapis.com/auth/classroom.courses.readonly`
+- `https://www.googleapis.com/auth/classroom.coursework.me.readonly`
+- `https://www.googleapis.com/auth/classroom.student-submissions.me.readonly`
+
+### Variables de entorno usadas
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `NEXTAUTH_URL`
+
+### Endpoints disponibles
+- `GET /api/classroom`: retorna los cursos del usuario autenticado (requiere sesión iniciada y permisos aceptados en el consentimiento de Google).
+
+Ejemplo (una vez autenticado en el navegador):
+
+```bash
+curl -X GET http://localhost:3000/api/classroom
 ```
 
 ## Próximos Pasos
