@@ -1,80 +1,82 @@
-'use client'
+import { redirect } from "next/navigation"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { setAccessToken } from "@/lib/google"
+import { getStudentDashboardData } from "@/features/dashboard/services/studentDashboardService"
+import { ProgressOverview } from "@/features/dashboard/components/ProgressOverview"
+import { NotificationPanel } from "@/features/dashboard/components/NotificationPanel"
+import { UpcomingAssignments } from "@/features/dashboard/components/UpcomingAssignments"
+import { PerformanceChart } from "@/features/dashboard/components/PerformanceChart"
+import { QuickActions } from "@/features/dashboard/components/QuickActions"
 
-import { signOut, useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+export const dynamic = "force-dynamic"
 
-export default function DashboardPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    redirect("/login")
+  }
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login")
-    }
-  }, [status, router])
-
-  if (status === "loading") {
+  const accessToken = session?.accessToken
+  if (!accessToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="p-6">
+        <h1 className="text-xl font-semibold">Falta token de acceso</h1>
+        <p className="text-muted-foreground">Vuelve a iniciar sesión para otorgar permisos de Google Classroom.</p>
       </div>
     )
   }
 
-  if (!session) {
-    return null
-  }
+  setAccessToken(accessToken)
 
-  const handleSignOut = () => {
-    signOut({ callbackUrl: "/login" })
-  }
+  // Get student dashboard data
+  const dashboardData = await getStudentDashboardData(session.user?.email || "")
 
   return (
-    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                ¡Bienvenido al Dashboard!
-              </h2>
-              <div className="bg-white shadow rounded-lg p-6 max-w-md mx-auto">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Información de la Sesión
-                </h3>
-                <div className="space-y-2 text-left">
-                  <p><strong>Email:</strong> {session.user?.email}</p>
-                  <p><strong>Nombre:</strong> {session.user?.name || 'No disponible'}</p>
-                  <p><strong>Rol:</strong> {session.user?.role}</p>
-                </div>
-              </div>
-              
-              {session.user?.role === 'profesor' && (
-                <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-green-800">
-                    🎓 Tienes acceso como <strong>Profesor</strong>
-                  </p>
-                </div>
-              )}
-              
-              {session.user?.role === 'coordinador' && (
-                <div className="mt-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
-                  <p className="text-purple-800">
-                    👑 Tienes acceso como <strong>Coordinador</strong>
-                  </p>
-                </div>
-              )}
-              
-              {session.user?.role === 'alumno' && (
-                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-blue-800">
-                    📚 Tienes acceso como <strong>Alumno</strong>
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+    <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">
+          ¡Hola, {session.user?.name?.split(' ')[0] || 'Estudiante'}! 👋
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Aquí tienes un resumen de tu progreso en Semillero Digital
+        </p>
+      </div>
+
+      {/* Main Dashboard Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Progress Overview - Most Important */}
+          <ProgressOverview data={dashboardData} />
+          
+          {/* Notifications Panel */}
+          <NotificationPanel />
+          
+          {/* Upcoming Assignments */}
+          <UpcomingAssignments assignments={dashboardData.upcomingAssignments} />
         </div>
+
+        {/* Right Column - Secondary Content */}
+        <div className="space-y-6">
+          {/* Performance Chart */}
+          <PerformanceChart data={dashboardData} />
+          
+          {/* Quick Actions */}
+          <QuickActions />
+        </div>
+      </div>
+
+      {/* Footer Message */}
+      <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+        <div className="flex items-center gap-2">
+          <span className="text-blue-600">🎯</span>
+          <p className="text-blue-800 text-sm">
+            <strong>Semillero Digital</strong> te ayuda a complementar Google Classroom con seguimiento consolidado de progreso y comunicación clara.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
