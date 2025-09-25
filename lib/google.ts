@@ -16,6 +16,44 @@ export function setAccessToken(token: string) {
   oauth2Client.setCredentials({ access_token: token })
 }
 
+export type Announcement = {
+  id?: string | null
+  courseId: string
+  text?: string | null
+  alternateLink?: string | null
+  state?: string | null
+  creationTime?: string | null
+  updateTime?: string | null
+}
+
+export async function getAnnouncements(courseId: string): Promise<Announcement[]> {
+  requireAuth()
+  const classroom = getClassroom()
+  const items: Announcement[] = []
+  let pageToken: string | undefined
+  do {
+    const res = await classroom.courses.announcements.list({
+      courseId,
+      pageSize: 100,
+      pageToken,
+    })
+    const anns = res.data.announcements ?? []
+    for (const a of anns) {
+      items.push({
+        id: a.id,
+        courseId,
+        text: a.text,
+        alternateLink: a.alternateLink,
+        state: a.state as string | undefined,
+        creationTime: a.creationTime || undefined,
+        updateTime: a.updateTime || undefined,
+      })
+    }
+    pageToken = res.data.nextPageToken || undefined
+  } while (pageToken)
+  return items
+}
+
 function requireAuth() {
   if (!currentAccessToken) {
     throw new Error("Google OAuth access token is not set. Call setAccessToken(token) first.")
