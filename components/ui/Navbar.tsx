@@ -63,12 +63,14 @@ export function Navbar() {
           {/* Logo and brand */}
           <div className="flex items-center">
             <Link href={session ? "/dashboard" : "/"} className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">CC</span>
+              <div className="hidden sm:block">
+                <span className="navbar-brand">
+                  Conecta Clases
+                </span>
+                <span className="text-sm text-gray-500 ml-2">
+                  By Semillero Digital
+                </span>
               </div>
-              <span className="navbar-brand hidden sm:block">
-                Conecta Clases
-              </span>
             </Link>
           </div>
 

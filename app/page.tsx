@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-20 text-center">
+      <section className="container mx-auto px-6 py-22 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             Potencia tu{" "}
@@ -34,7 +34,7 @@ export default function Home() {
       </section>
 
       {/* How it Works Section */}
-      <section className="container mx-auto px-6 py-20">
+      <section className="container mx-auto px-6 py-22">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             ¿Cómo funciona Conecta Clases?
