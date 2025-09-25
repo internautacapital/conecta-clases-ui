@@ -2,6 +2,7 @@
 
 import type { CourseMetrics } from "@/features/metrics/services/metricsService"
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { useClientOnly } from "@/hooks/useClientOnly"
 
 type Props = {
   metrics: CourseMetrics
@@ -9,6 +10,8 @@ type Props = {
 }
 
 export function MetricsCharts({ metrics, loading }: Props) {
+  const isClient = useClientOnly()
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -17,6 +20,44 @@ export function MetricsCharts({ metrics, loading }: Props) {
         </div>
         <div className="h-80 bg-gray-100 rounded-lg animate-pulse flex items-center justify-center">
           <span className="text-gray-500">Cargando gráficos...</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Show placeholder during SSR to prevent hydration mismatches with Recharts
+  if (!isClient) {
+    return (
+      <div className="space-y-8">
+        {/* Summary Cards - Safe to render on server */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-6 rounded-lg border">
+            <div className="text-2xl font-bold text-blue-600">{metrics.totalStudents}</div>
+            <div className="text-sm text-gray-600">Total estudiantes</div>
+          </div>
+          <div className="bg-white p-6 rounded-lg border">
+            <div className="text-2xl font-bold text-green-600">{metrics.totalAssignments}</div>
+            <div className="text-sm text-gray-600">Total tareas</div>
+          </div>
+          <div className="bg-white p-6 rounded-lg border">
+            <div className="text-2xl font-bold text-purple-600">{metrics.totalAnnouncements}</div>
+            <div className="text-sm text-gray-600">Total anuncios</div>
+          </div>
+        </div>
+
+        {/* Chart Placeholders */}
+        <div className="bg-white p-6 rounded-lg border">
+          <h3 className="text-lg font-semibold mb-4">Asistencia Semanal (%)</h3>
+          <div className="h-80 bg-gray-50 rounded-lg flex items-center justify-center">
+            <span className="text-gray-500">Cargando gráfico...</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border">
+          <h3 className="text-lg font-semibold mb-4">Entregas y Participación Semanal</h3>
+          <div className="h-80 bg-gray-50 rounded-lg flex items-center justify-center">
+            <span className="text-gray-500">Cargando gráfico...</span>
+          </div>
         </div>
       </div>
     )

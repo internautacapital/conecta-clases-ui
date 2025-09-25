@@ -2,6 +2,7 @@
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { StudentProgress } from "@/features/progress/services/progressService"
+import { useClientOnly } from "@/hooks/useClientOnly"
 
 type Props = {
   title?: string
@@ -9,6 +10,8 @@ type Props = {
 }
 
 export function ProgressTable({ title = "Progreso de alumnos", data }: Props) {
+  const isClient = useClientOnly()
+  
   return (
     <div className="w-full">
       <Table>
@@ -56,9 +59,9 @@ export function ProgressTable({ title = "Progreso de alumnos", data }: Props) {
                   <time
                     className="text-sm tabular-nums"
                     dateTime={s.lastSubmissionAt}
-                    title={formatDateTimeTooltip(s.lastSubmissionAt)}
+                    title={isClient ? formatDateTimeTooltip(s.lastSubmissionAt) : s.lastSubmissionAt}
                   >
-                    {formatRelativeDate(s.lastSubmissionAt)}
+                    {isClient ? formatRelativeDate(s.lastSubmissionAt) : formatStaticDate(s.lastSubmissionAt)}
                   </time>
                 ) : (
                   <span className="text-muted-foreground">—</span>
@@ -83,6 +86,16 @@ function formatRelativeDate(iso: string) {
   if (minutes < 60) return `${minutes} min`
   if (hours < 24) return `${hours} h`
   return `${days} d`
+}
+
+function formatStaticDate(iso: string) {
+  // Return a static, server-safe date format that won't cause hydration mismatches
+  const d = new Date(iso)
+  return d.toLocaleDateString('es-ES', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric' 
+  })
 }
 
 function formatDateTimeTooltip(iso: string) {
