@@ -64,7 +64,7 @@ export function Navbar() {
           <div className="flex items-center">
             <Link href={session ? "/dashboard" : "/"} className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SD</span>
+                <span className="text-white font-bold text-sm">CC</span>
               </div>
               <span className="navbar-brand hidden sm:block">
                 Conecta Clases
