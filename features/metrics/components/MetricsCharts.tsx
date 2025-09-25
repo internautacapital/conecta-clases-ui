@@ -1,8 +1,7 @@
 "use client"
 
-import * as React from "react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts"
 import type { CourseMetrics } from "@/features/metrics/services/metricsService"
+import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 type Props = {
   metrics: CourseMetrics

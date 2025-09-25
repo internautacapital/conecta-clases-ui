@@ -1,4 +1,4 @@
-import { getCourseWork, getStudentSubmissions, getStudents, getAnnouncements, getAnnouncementReplies } from "@/lib/google"
+import { getAnnouncementReplies, getAnnouncements, getCourseWork, getStudentSubmissions, getStudents } from "@/lib/google"
 
 export type WeeklyMetrics = {
   week: string // YYYY-MM-DD format (start of week)

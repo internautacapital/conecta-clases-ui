@@ -1,16 +1,16 @@
-import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { setAccessToken, getCourses } from "@/lib/google"
-import { getCourseProgress } from "@/features/progress/services/progressService"
 import { ProgressTable } from "@/features/progress/components/ProgressTable"
+import { getCourseProgress } from "@/features/progress/services/progressService"
+import { authOptions } from "@/lib/auth"
+import { getCourses, setAccessToken } from "@/lib/google"
+import { getServerSession } from "next-auth"
+import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
 export default async function ProgressPage({
   searchParams,
 }: {
-  searchParams?: { courseId?: string }
+  searchParams?: Promise<{ courseId?: string }>
 }) {
   const session = await getServerSession(authOptions)
   if (!session) {
@@ -29,7 +29,8 @@ export default async function ProgressPage({
 
   setAccessToken(accessToken)
 
-  const courseId = searchParams?.courseId
+  const params = await searchParams
+  const courseId = params?.courseId
 
   if (!courseId) {
     // If no course selected, show a simple list of available courses to choose

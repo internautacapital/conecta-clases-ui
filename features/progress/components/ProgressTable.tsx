@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { StudentProgress } from "@/features/progress/services/progressService"
 

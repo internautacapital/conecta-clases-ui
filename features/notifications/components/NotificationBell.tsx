@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import { Bell } from "lucide-react"
 import { useNotifications } from "@/features/notifications/hooks/useNotifications"
+import { Bell } from "lucide-react"
+import * as React from "react"
 
 export function NotificationBell() {
   const { items, count, isLoading, isError, refetch } = useNotifications()

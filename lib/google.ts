@@ -1,5 +1,5 @@
-import { google } from "googleapis"
 import type { classroom_v1 } from "googleapis"
+import { google } from "googleapis"
 
 const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/callback/google`
 

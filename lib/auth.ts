@@ -1,6 +1,6 @@
-import { NextAuthOptions, Account, Session } from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
-import { JWT } from "next-auth/jwt"
+import { Account, NextAuthOptions, Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
+import GoogleProvider from "next-auth/providers/google";
 
 export const authOptions: NextAuthOptions = {
   providers: [

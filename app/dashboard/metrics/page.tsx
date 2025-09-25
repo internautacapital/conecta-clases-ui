@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic"
 export default async function MetricsPage({
   searchParams,
 }: {
-  searchParams?: { courseId?: string }
+  searchParams?: Promise<{ courseId?: string }>
 }) {
   const session = await getServerSession(authOptions)
   if (!session) {
@@ -29,7 +29,8 @@ export default async function MetricsPage({
 
   setAccessToken(accessToken)
 
-  const courseId = searchParams?.courseId
+  const params = await searchParams
+  const courseId = params?.courseId
 
   if (!courseId) {
     // If no course selected, show a simple list of available courses to choose
