@@ -47,15 +47,39 @@ export async function getCourseWork(courseId: string) {
   return res.data.courseWork ?? []
 }
 
-export async function getStudentSubmissions(courseId: string, courseworkId: string) {
+export async function getStudentSubmissions(courseId: string, courseworkId: string, userId?: string) {
   requireAuth()
   const classroom = getClassroom()
   const res = await classroom.courses.courseWork.studentSubmissions.list({
     courseId,
     courseWorkId: courseworkId,
-    // Use the current authenticated user
-    userId: "me",
+    // If provided, fetch for a specific user; otherwise fetch all
+    userId: userId ?? undefined,
     pageSize: 100,
   })
   return res.data.studentSubmissions ?? []
+}
+
+export async function getStudents(courseId: string) {
+  requireAuth()
+  const classroom = getClassroom()
+  const students: Array<{ userId: string; name: string }> = []
+  let pageToken: string | undefined
+  do {
+    const res = await classroom.courses.students.list({
+      courseId,
+      pageSize: 100,
+      pageToken,
+    })
+    const items = res.data.students ?? []
+    for (const s of items) {
+      const userId = s.userId || s.profile?.id
+      const name = s.profile?.name?.fullName || s.profile?.name?.givenName || "Desconocido"
+      if (userId) {
+        students.push({ userId, name })
+      }
+    }
+    pageToken = res.data.nextPageToken || undefined
+  } while (pageToken)
+  return students
 }
