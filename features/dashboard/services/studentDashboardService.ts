@@ -196,7 +196,7 @@ export async function getStudentDashboardData(userEmail: string): Promise<Studen
       if (!b.dueDate) return -1
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
     })
-    
+
     // Generate some recent grades (simplified)
     const recentGrades = courseProgress
       .filter(cp => cp.averageGrade !== undefined)

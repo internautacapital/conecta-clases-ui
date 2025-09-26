@@ -6,8 +6,7 @@ import { getStudentDashboardData } from "@/features/dashboard/services/studentDa
 import { ProgressOverview } from "@/features/dashboard/components/ProgressOverview"
 import { NotificationPanel } from "@/features/dashboard/components/NotificationPanel"
 import { UpcomingAssignments } from "@/features/dashboard/components/UpcomingAssignments"
-import { PerformanceChart } from "@/features/dashboard/components/PerformanceChart"
-import { QuickActions } from "@/features/dashboard/components/QuickActions"
+ import { QuickActions } from "@/features/dashboard/components/QuickActions"
 
 export const dynamic = "force-dynamic"
 
@@ -59,10 +58,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Right Column - Secondary Content */}
-        <div className="space-y-6">
-          {/* Performance Chart */}
-          <PerformanceChart data={dashboardData} />
-          
+        <div className="space-y-6">          
           {/* Quick Actions */}
           <QuickActions />
         </div>
