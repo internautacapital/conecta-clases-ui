@@ -2,6 +2,8 @@ import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/ui/Navbar";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { ErrorInterceptor } from "@/components/ErrorInterceptor";
+import { TourInitializer } from "@/components/TourInitializer";
+import { HelpButton } from "@/components/ui/HelpButton";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -34,11 +36,13 @@ export default function RootLayout({
       >
         <Providers>
           <ErrorInterceptor />
+          <TourInitializer />
           <PageLoader />
           <Navbar />
           <main className="min-h-screen bg-background">
             {children}
           </main>
+          <HelpButton />
         </Providers>
       </body>
     </html>

@@ -38,7 +38,7 @@ export function CourseSelector({ courses, currentCourseId, basePath }: CourseSel
   }
 
   return (
-    <div className="relative">
+    <div className="relative" data-tour="course-selector">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 transition-colors min-w-[200px] justify-between cursor-pointer"
