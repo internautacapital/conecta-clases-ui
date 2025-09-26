@@ -1,63 +1,81 @@
-"use client"
+"use client";
 
-import { HelpButton } from "@/components/ui/HelpButton"
-import { LoadingLink } from "@/components/ui/LoadingLink"
-import { NotificationBell } from "@/features/notifications/components/NotificationBell"
-import { BarChart3, Home, LogOut, Menu, TrendingUp, X } from "lucide-react"
-import { signOut, useSession } from "next-auth/react"
-import { usePathname } from "next/navigation"
-import * as React from "react"
+import { HelpButton } from "@/components/ui/HelpButton";
+import { LoadingLink } from "@/components/ui/LoadingLink";
+import { NotificationBell } from "@/features/notifications/components/NotificationBell";
+import {
+  BarChart3,
+  Home,
+  LogOut,
+  Menu,
+  Presentation,
+  TrendingUp,
+  X,
+} from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
+import * as React from "react";
 
 export function Navbar() {
-  const pathname = usePathname()
-  const { data: session } = useSession()
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
-  const [userMenuOpen, setUserMenuOpen] = React.useState(false)
- 
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [userMenuOpen, setUserMenuOpen] = React.useState(false);
+
   // Close menus when clicking outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      const target = event.target as HTMLElement
-      if (!target.closest('[data-user-menu]')) {
-        setUserMenuOpen(false)
+      const target = event.target as HTMLElement;
+      if (!target.closest("[data-user-menu]")) {
+        setUserMenuOpen(false);
       }
-      if (!target.closest('[data-mobile-menu]')) {
-        setMobileMenuOpen(false)
+      if (!target.closest("[data-mobile-menu]")) {
+        setMobileMenuOpen(false);
       }
     }
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [])
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/" })
-  }
+    signOut({ callbackUrl: "/" });
+  };
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Progreso', href: '/dashboard/progress', icon: TrendingUp },
-    { name: 'Métricas', href: '/dashboard/metrics', icon: BarChart3 },
-  ]
+    { name: "Dashboard", href: "/dashboard", icon: Home },
+    { name: "Progreso", href: "/dashboard/progress", icon: TrendingUp },
+    { name: "Métricas", href: "/dashboard/metrics", icon: BarChart3 },
+    {
+      name: "Tus Clases",
+      href: "/dashboard/notifications",
+      icon: Presentation,
+    },
+  ];
 
   const isActive = (href: string) => {
-    if (href === '/dashboard') {
-      return pathname === '/dashboard'
+    if (href === "/dashboard") {
+      return pathname === "/dashboard";
     }
-    return pathname.startsWith(href)
-  }
+    return pathname.startsWith(href);
+  };
 
   const getUserInitials = (name?: string | null, email?: string | null) => {
     if (name) {
-      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+      return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
     }
     if (email) {
-      return email[0].toUpperCase()
+      return email[0].toUpperCase();
     }
-    return 'U'
-  }
+    return "U";
+  };
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-4 py-3" >
+    <nav className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-8" data-tour="navbar">
           <LoadingLink href="/" className="flex items-center space-x-2">
@@ -66,26 +84,28 @@ export function Navbar() {
             </div>
             <span className="font-semibold text-gray-900">Conecta Clases</span>
           </LoadingLink>
-          
+
           {session && (
             <div className="hidden md:flex items-center space-x-6">
               {navigation.map((item) => {
-                const IconComponent = item.icon
+                const IconComponent = item.icon;
                 return (
                   <LoadingLink
                     key={item.name}
                     href={item.href}
                     className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       isActive(item.href)
-                        ? 'text-blue-600 bg-blue-50'
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                        ? "text-blue-600 bg-blue-50"
+                        : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
                     }`}
-                    data-tour={item.href === '/dashboard' ? 'dashboard-link' : undefined}
+                    data-tour={
+                      item.href === "/dashboard" ? "dashboard-link" : undefined
+                    }
                   >
                     <IconComponent className="w-4 h-4" />
                     {item.name}
                   </LoadingLink>
-                )
+                );
               })}
             </div>
           )}
@@ -107,8 +127,8 @@ export function Navbar() {
 
           {/* Login button - only show when not authenticated */}
           {!session && (
-            <LoadingLink 
-              href="/login" 
+            <LoadingLink
+              href="/login"
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               Iniciar Sesión
@@ -134,7 +154,7 @@ export function Navbar() {
                 <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg py-1">
                   <div className="px-4 py-2 border-b border-gray-200">
                     <p className="text-sm font-medium text-gray-900">
-                      {session.user?.name || 'Usuario'}
+                      {session.user?.name || "Usuario"}
                     </p>
                     <p className="text-xs text-gray-500">
                       {session.user?.email}
@@ -143,7 +163,7 @@ export function Navbar() {
                       {session.user?.role}
                     </span>
                   </div>
-           
+
                   <button
                     onClick={handleSignOut}
                     className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
@@ -163,7 +183,11 @@ export function Navbar() {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
               >
-                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {mobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
               </button>
             </div>
           )}
@@ -175,24 +199,24 @@ export function Navbar() {
         <div className="md:hidden border-t border-gray-200">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navigation.map((item) => {
-              const IconComponent = item.icon
+              const IconComponent = item.icon;
               return (
                 <LoadingLink
                   key={item.name}
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2 rounded-md text-base font-medium transition-colors ${
                     isActive(item.href)
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <IconComponent className="w-5 h-5" />
                   {item.name}
                 </LoadingLink>
-              )
+              );
             })}
-            
+
             {/* Help button in mobile menu */}
             <div className="px-3 py-2">
               <HelpButton variant="inline" className="w-full justify-start" />
@@ -201,5 +225,5 @@ export function Navbar() {
         </div>
       )}
     </nav>
-  )
+  );
 }
