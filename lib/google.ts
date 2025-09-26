@@ -113,6 +113,15 @@ function convertNullToUndefined(
   return value ?? undefined;
 }
 
+export async function getUserProfile(userId: string) {
+  requireAuth();
+  const classroom = getClassroom();
+  const userProfile = await classroom.userProfiles.get({
+    userId: userId,
+  });
+  return userProfile.data;
+}
+
 export async function getCourses() {
   requireAuth();
   const classroom = getClassroom();

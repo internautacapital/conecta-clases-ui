@@ -1,5 +1,10 @@
 import { authOptions } from "@/lib/auth";
 import { createErrorResponse } from "@/lib/errorMiddleware";
+import {
+  sendBatchGmailMessages,
+  setGmailAccessToken,
+  type EmailMessage,
+} from "@/lib/gmail";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -24,8 +29,22 @@ export async function POST(request: NextRequest) {
     const body: ReminderRequest = await request.json();
     const { taskId, taskTitle, courseName, dueDate, students } = body;
 
+    const accessToken = session.accessToken;
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: "Missing Google access token in session" },
+        { status: 400 }
+      );
+    }
+
     // Validate required fields
-    if (!taskId || !taskTitle || !courseName || !students || students.length === 0) {
+    if (
+      !taskId ||
+      !taskTitle ||
+      !courseName ||
+      !students ||
+      students.length === 0
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -33,8 +52,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Filter students with valid email addresses
-    const studentsWithEmail = students.filter(student => student.email);
-    
+    const studentsWithEmail = students.filter((student) => student.email);
+
     if (studentsWithEmail.length === 0) {
       return NextResponse.json(
         { error: "No students with valid email addresses found" },
@@ -42,65 +61,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Implement actual email sending logic
-    // This is where you would integrate with your email service (SendGrid, Nodemailer, etc.)
-    
-    // Email template (for future implementation)
-    const emailTemplate = {
-      subject: `Recordatorio: ${taskTitle} - ${courseName}`,
-      body: `
-        Hola,
+    setGmailAccessToken(accessToken);
 
-        Este es un recordatorio de que tienes una tarea pendiente:
+    const emailSubject = `Recordatorio: ${taskTitle} - ${courseName}`;
+    const emailBody = `Hola,
 
-        Curso: ${courseName}
-        Tarea: ${taskTitle}
-        ${dueDate ? `Fecha de entrega: ${new Date(dueDate).toLocaleDateString('es-ES')}` : ''}
+Este es un recordatorio de que tienes una tarea pendiente:
 
-        Por favor, completa y entrega tu tarea lo antes posible.
+Curso: ${courseName}
+Tarea: ${taskTitle}${
+      dueDate
+        ? `
+Fecha de entrega: ${new Date(dueDate).toLocaleDateString("es-ES")}`
+        : ""
+    }
 
-        Saludos,
-        ${session.user?.name || 'Tu profesor'}
-      `
-    };
+Por favor, completa y entrega tu tarea lo antes posible.
 
-    // For now, we'll simulate the email sending
+Saludos,
+${session.user?.name || "Tu profesor"}
+
+---
+Este mensaje fue enviado automáticamente desde Conecta Clases.`;
+
+    // Prepare email messages for each student
+    const emailMessages: EmailMessage[] = studentsWithEmail.map((student) => ({
+      to: [student.email!],
+      subject: emailSubject,
+      body: emailBody,
+      from: session.user?.email || undefined,
+    }));
+
     console.log("Sending reminder emails:", {
       taskTitle,
       courseName,
       dueDate,
-      recipients: studentsWithEmail.map(s => s.email),
+      recipients: studentsWithEmail.map((s) => s.email),
       teacherEmail: session.user?.email,
       teacherName: session.user?.name,
-      emailTemplate
+      totalEmails: emailMessages.length,
     });
 
-    // Here you would actually send the emails
-    // Example with a hypothetical email service:
-    /*
-    const emailService = new EmailService();
-    const emailPromises = studentsWithEmail.map(student => 
-      emailService.send({
-        to: student.email!,
-        subject: emailSubject,
-        text: emailBody,
-        from: session.user?.email || 'noreply@conectaclases.com'
-      })
-    );
-    
-    await Promise.all(emailPromises);
-    */
+    // Send emails using Gmail API
+    const results = await sendBatchGmailMessages(emailMessages, 500); // 500ms delay between emails
 
-    // Simulate delay for demo purposes
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Log results
+    console.log("Email sending results:", results);
+
+    if (results.failed > 0) {
+      console.error("Some emails failed to send:", results.errors);
+    }
 
     return NextResponse.json({
-      success: true,
-      message: `Recordatorios enviados a ${studentsWithEmail.length} estudiantes`,
-      sentTo: studentsWithEmail.length,
-      skipped: students.length - studentsWithEmail.length
+      success: results.sent > 0,
+      message:
+        results.failed === 0
+          ? `Recordatorios enviados exitosamente a ${results.sent} estudiantes`
+          : `Se enviaron ${results.sent} recordatorios, ${results.failed} fallaron`,
+      sentTo: results.sent,
+      failed: results.failed,
+      skipped: students.length - studentsWithEmail.length,
+      errors: results.errors,
     });
-
   } catch (error: unknown) {
     console.error("/api/send-reminder error:", error);
     return createErrorResponse(error as Error, 500);

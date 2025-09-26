@@ -18,7 +18,10 @@ export const authOptions: NextAuthOptions = {
             "https://www.googleapis.com/auth/classroom.student-submissions.me.readonly",
             "https://www.googleapis.com/auth/classroom.coursework.students.readonly",
             "https://www.googleapis.com/auth/classroom.rosters.readonly",
+            "https://www.googleapis.com/auth/classroom.profile.emails",
+            "https://www.googleapis.com/auth/classroom.profile.photos",
             "https://www.googleapis.com/auth/classroom.announcements.readonly",
+            "https://www.googleapis.com/auth/gmail.send",
           ].join(" "),
         },
       },
@@ -51,7 +54,6 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       // Send properties to the client
-
       if (token) {
         session.accessToken = token.accessToken as string;
         session.user.email = token.email as string;

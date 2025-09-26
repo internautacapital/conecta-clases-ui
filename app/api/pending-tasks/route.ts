@@ -1,6 +1,14 @@
 import { authOptions } from "@/lib/auth";
 import { createErrorResponse } from "@/lib/errorMiddleware";
-import { getCourses, getCourseWork, getStudentSubmissions, getStudents, setAccessToken } from "@/lib/google";
+import {
+  getCourses,
+  getCourseWork,
+  getStudentSubmissions,
+  getStudents,
+  setAccessToken,
+  type StudentSubmission,
+  getUserProfile,
+} from "@/lib/google";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -38,8 +46,8 @@ export async function GET() {
 
     // Get all courses where user is a teacher
     const courses = await getCourses();
-    const teacherCourses = courses.filter(course => 
-      course.teacherFolder || course.ownerId === session.user?.email
+    const teacherCourses = courses.filter(
+      (course) => course.teacherFolder || course.ownerId === session.user?.email
     );
 
     const pendingTasks: PendingTask[] = [];
@@ -51,7 +59,7 @@ export async function GET() {
       try {
         // Get all coursework for this course
         const courseWork = await getCourseWork(course.id);
-        
+
         // Get all students in this course
         const students = await getStudents(course.id);
 
@@ -62,49 +70,90 @@ export async function GET() {
           try {
             // Get all submissions for this coursework
             const submissions = await getStudentSubmissions(course.id, work.id);
-            
-            // Find students with pending submissions (NEW, CREATED, or RECLAIMED_BY_STUDENT states)
-            const pendingStudents = students.filter(student => {
-              const submission = submissions.find(sub => sub.userId === student.userId);
-              
-              // If no submission found, it's pending
-              if (!submission) return true;
-              
-              // Check if submission state indicates it's pending
-              const pendingStates = ['NEW', 'CREATED', 'RECLAIMED_BY_STUDENT'];
-              return pendingStates.includes(submission.state || 'NEW');
-            }).map(student => {
-              const submission = submissions.find(sub => sub.userId === student.userId);
-              return {
-                userId: student.userId,
-                name: student.name,
-                email: student.email,
-                submissionState: submission?.state || 'NOT_SUBMITTED'
-              };
-            });
+
+            // Helper function to get email from userId or student data
+            const getStudentEmail = (
+              student: { userId: string; name: string; email?: string },
+              submission: StudentSubmission | undefined
+            ) => {
+              // First try student.email from the students list
+              if (student.email) return student.email;
+
+              // If userId looks like an email, use it
+              if (student.userId && student.userId.includes("@")) {
+                return student.userId;
+              }
+
+              // If submission userId looks like an email, use it
+              if (submission?.userId && submission.userId.includes("@")) {
+                return submission.userId;
+              }
+
+              return undefined;
+            };
+
+            // Find students with pending submissions and get their details
+            const pendingStudentsPromises = students
+              .filter((student) => {
+                const submission = submissions.find(
+                  (sub) => sub.userId === student.userId
+                );
+
+                // If no submission found, it's pending
+                if (!submission) return true;
+
+                // Check if submission state indicates it's pending
+                const pendingStates = [
+                  "NEW",
+                  "CREATED",
+                  "RECLAIMED_BY_STUDENT",
+                ];
+                return pendingStates.includes(submission.state || "NEW");
+              })
+              .map(async (student) => {
+                const submission = submissions.find(
+                  (sub) => sub.userId === student.userId
+                );
+
+                const userProfile = await getUserProfile(student.userId);
+
+                return {
+                  userId: student.userId,
+                  name: student.name,
+                  email: userProfile?.emailAddress ?? "",
+                  submissionState: submission?.state || "NOT_SUBMITTED",
+                };
+              });
+
+            // Resolve all promises to get the actual pending students data
+            const pendingStudents = await Promise.all(pendingStudentsPromises);
 
             // Only add to pending tasks if there are students with pending work
             if (pendingStudents.length > 0) {
               pendingTasks.push({
                 courseId: course.id,
-                courseName: course.name || 'Curso sin nombre',
+                courseName: course.name || "Curso sin nombre",
                 taskId: work.id,
-                taskTitle: work.title || 'Tarea sin título',
+                taskTitle: work.title || "Tarea sin título",
                 taskDescription: work.description || undefined,
-                dueDate: work.dueDate ? 
-                  `${work.dueDate.year}-${String(work.dueDate.month).padStart(2, '0')}-${String(work.dueDate.day).padStart(2, '0')}` : 
-                  undefined,
-                pendingStudents
+                dueDate: work.dueDate
+                  ? `${work.dueDate.year}-${String(work.dueDate.month).padStart(
+                      2,
+                      "0"
+                    )}-${String(work.dueDate.day).padStart(2, "0")}`
+                  : undefined,
+                pendingStudents,
               });
             }
           } catch (error) {
-            console.error(`Error processing coursework ${work.id} in course ${course.id}:`, error);
-            // Continue with next coursework
+            console.error(
+              `Error processing coursework ${work.id} in course ${course.id}:`,
+              error
+            );
           }
         }
       } catch (error) {
         console.error(`Error processing course ${course.id}:`, error);
-        // Continue with next course
       }
     }
 

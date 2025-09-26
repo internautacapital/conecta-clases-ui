@@ -10,6 +10,7 @@ import { useState } from "react";
 
 export function PendingTasksView() {
   const { data, isLoading, error, refetch, isRefetching } = usePendingTasks();
+
   const [sendingEmails, setSendingEmails] = useState<string[]>([]);
 
   const handleSendReminder = async (
@@ -41,13 +42,14 @@ export function PendingTasksView() {
       const result = await response.json();
 
       if (result.success) {
-        alert(
-          `✅ Recordatorios enviados exitosamente a ${
-            result.sentTo
-          } estudiantes${
-            result.skipped > 0 ? ` (${result.skipped} sin email)` : ""
-          }`
-        );
+        let message = `✅ ${result.message}`;
+        if (result.skipped > 0) {
+          message += ` (${result.skipped} estudiantes sin email)`;
+        }
+        if (result.failed > 0) {
+          message += `\n⚠️ ${result.failed} correos fallaron`;
+        }
+        alert(message);
       } else {
         throw new Error(result.message || "Error desconocido");
       }
@@ -234,15 +236,15 @@ export function PendingTasksView() {
                 {/* Send reminder button */}
                 <div className="flex justify-end">
                   <Button
-                    onClick={() =>
+                    onClick={() => {
                       handleSendReminder(
                         task.taskId,
                         task.taskTitle,
                         task.courseName,
                         task.dueDate,
                         task.pendingStudents
-                      )
-                    }
+                      );
+                    }}
                     disabled={sendingEmails.includes(task.taskId)}
                     size="sm"
                   >
