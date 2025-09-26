@@ -2,6 +2,7 @@ import { authOptions } from "@/lib/auth"
 import { getCourses, setAccessToken } from "@/lib/google"
 import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
+import { createErrorResponse } from "@/lib/errorMiddleware"
 
 export async function GET() {
   try {
@@ -24,6 +25,6 @@ export async function GET() {
     return NextResponse.json({ courses })
   } catch (error: any) {
     console.error("/api/classroom error:", error)
-    return NextResponse.json({ error: error?.message || "Internal Server Error" }, { status: 500 })
+     return createErrorResponse(error, 500, true)
   }
 }

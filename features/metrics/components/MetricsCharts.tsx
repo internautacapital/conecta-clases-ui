@@ -134,24 +134,13 @@ export function MetricsCharts({ metrics, loading }: Props) {
               dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
               name="submissionsCount"
             />
-            <Line 
-              type="monotone" 
-              dataKey="participationCount" 
-              stroke="#8B5CF6" 
-              strokeWidth={3}
-              dot={{ fill: "#8B5CF6", strokeWidth: 2, r: 4 }}
-              name="participationCount"
-            />
+        
           </LineChart>
         </ResponsiveContainer>
         <div className="flex justify-center mt-4 space-x-6">
           <div className="flex items-center">
             <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
             <span className="text-sm text-gray-600">Entregas</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 bg-purple-500 rounded mr-2"></div>
-            <span className="text-sm text-gray-600">Participación</span>
           </div>
         </div>
       </div>

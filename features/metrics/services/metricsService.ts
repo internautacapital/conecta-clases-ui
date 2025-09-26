@@ -1,11 +1,10 @@
-import { getAnnouncementReplies, getAnnouncements, getCourseWork, getStudentSubmissions, getStudents } from "@/lib/google"
+import { getAnnouncements, getCourseWork, getStudentSubmissions, getStudents } from "@/lib/google"
 
 export type WeeklyMetrics = {
   week: string // YYYY-MM-DD format (start of week)
   weekLabel: string // "Semana 1", "Semana 2", etc.
   attendancePercent: number
-  submissionsCount: number
-  participationCount: number
+  submissionsCount: number 
 }
 
 export type CourseMetrics = {
@@ -67,27 +66,7 @@ export async function getCourseMetrics(courseId: string): Promise<CourseMetrics>
         }
       }
     }
-
-    // Calculate participation (announcement replies) for this week
-    let participationThisWeek = 0
-    for (const ann of announcements) {
-      if (!ann.id) continue
-      try {
-        const replies = await getAnnouncementReplies(courseId, ann.id)
-        for (const reply of replies) {
-          const replyTime = reply.creationTime
-          if (replyTime) {
-            const replyDate = new Date(replyTime)
-            if (replyDate >= weekStart && replyDate < weekEnd) {
-              participationThisWeek++
-            }
-          }
-        }
-      } catch (error) {
-        // Skip if replies API fails
-        console.warn(`Failed to get replies for announcement ${ann.id}:`, error)
-      }
-    }
+ 
 
     // For attendance, we'll simulate based on submissions activity
     // In a real scenario, you'd have actual attendance data
@@ -99,8 +78,7 @@ export async function getCourseMetrics(courseId: string): Promise<CourseMetrics>
       week: weekStart.toISOString().split('T')[0],
       weekLabel: formatWeekLabel(weekStart, i),
       attendancePercent,
-      submissionsCount: submissionsThisWeek,
-      participationCount: participationThisWeek,
+      submissionsCount: submissionsThisWeek
     })
   }
 

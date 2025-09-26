@@ -22,32 +22,6 @@ export type AnnouncementReply = {
   updateTime?: string | null
 }
 
-export async function getAnnouncementReplies(courseId: string, announcementId: string): Promise<AnnouncementReply[]> {
-  requireAuth()
-  const classroom = getClassroom()
-  const items: AnnouncementReply[] = []
-  let pageToken: string | undefined
-  do {
-    const repliesApi = (classroom.courses.announcements as any).replies
-    const res = await repliesApi.list({
-      courseId,
-      announcementId,
-      pageSize: 100,
-      pageToken,
-    })
-    const replies = (res.data as any).replies ?? []
-    for (const r of replies) {
-      items.push({
-        id: r.id,
-        creationTime: r.creationTime || undefined,
-        updateTime: r.updateTime || undefined,
-      })
-    }
-    pageToken = (res.data as any).nextPageToken || undefined
-  } while (pageToken)
-  return items
-}
-
 export type Announcement = {
   id?: string | null
   courseId: string

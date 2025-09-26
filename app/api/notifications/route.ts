@@ -1,4 +1,5 @@
 import { authOptions } from "@/lib/auth"
+import { createErrorResponse } from "@/lib/errorMiddleware"
 import { getAnnouncements, getCourses, setAccessToken } from "@/lib/google"
 import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
@@ -46,6 +47,7 @@ export async function GET() {
     return NextResponse.json({ announcements: flat })
   } catch (error: any) {
     console.error("/api/notifications error:", error)
-    return NextResponse.json({ error: error?.message || "Internal Server Error" }, { status: 500 })
+    // Si es un error 500, forzar logout
+    return createErrorResponse(error, 500, true)
   }
 }

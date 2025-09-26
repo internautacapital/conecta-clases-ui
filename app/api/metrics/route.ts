@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth"
 import { setAccessToken } from "@/lib/google"
 import { getServerSession } from "next-auth"
 import { NextRequest, NextResponse } from "next/server"
+import { createErrorResponse } from "@/lib/errorMiddleware"
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,6 +31,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ metrics })
   } catch (error: any) {
     console.error("/api/metrics error:", error)
-    return NextResponse.json({ error: error?.message || "Internal Server Error" }, { status: 500 })
+    // Si es un error 500, forzar logout
+    return createErrorResponse(error, 500, true)
   }
 }
