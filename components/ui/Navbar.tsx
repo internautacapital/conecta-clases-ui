@@ -3,6 +3,7 @@
 import { HelpButton } from "@/components/ui/HelpButton";
 import { LoadingLink } from "@/components/ui/LoadingLink";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
+import { useHasTeacherCourses } from "@/hooks/useHasTeacherCourses";
 import {
   BarChart3,
   Home,
@@ -15,10 +16,13 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import * as React from "react";
+import { Skeleton } from "./skeleton";
+import { Badge } from "./badge";
 
 export function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { hasTeacherCourses, isLoading } = useHasTeacherCourses();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
 
@@ -41,16 +45,23 @@ export function Navbar() {
     signOut({ callbackUrl: "/" });
   };
 
-  const navigation = [
-    { name: "Dashboard", href: "/dashboard", icon: Home },
-    { name: "Progreso", href: "/dashboard/progress", icon: TrendingUp },
-    { name: "Métricas", href: "/dashboard/metrics", icon: BarChart3 },
-    {
-      name: "Tus Clases",
-      href: "/dashboard/notifications",
-      icon: Presentation,
-    },
-  ];
+  const navigation = React.useMemo(() => {
+    const baseNavigation = [
+      { name: "Dashboard", href: "/dashboard", icon: Home },
+      { name: "Progreso", href: "/dashboard/progress", icon: TrendingUp },
+      { name: "Métricas", href: "/dashboard/metrics", icon: BarChart3 },
+    ];
+
+    if (hasTeacherCourses) {
+      baseNavigation.push({
+        name: "Tus Cursos",
+        href: "/dashboard/notifications",
+        icon: Presentation,
+      });
+    }
+
+    return baseNavigation;
+  }, [hasTeacherCourses]);
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -107,6 +118,19 @@ export function Navbar() {
                   </LoadingLink>
                 );
               })}
+              {isLoading ? (
+                <div className="flex items-center">
+                  <Skeleton className="h-[20px] w-[150px] rounded-sm bg-gray-300" />
+                </div>
+              ) : hasTeacherCourses ? (
+                <div className="flex items-center">
+                  <Badge variant="outline">Profesor</Badge>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <Badge variant="outline">Alumno</Badge>
+                </div>
+              )}
             </div>
           )}
         </div>

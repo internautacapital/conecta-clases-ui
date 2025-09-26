@@ -17,12 +17,14 @@ export function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center gap-2">
-          <RefreshCw className="h-4 w-4 animate-spin" />
-          <span>Cargando dashboard...</span>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <UserCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Buscando cursos...</h3>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -88,7 +90,9 @@ export function Dashboard() {
                 No hay cursos como profesor
               </h3>
               <p className="text-muted-foreground">
-                No tienes cursos asignados como profesor.
+                {isLoading
+                  ? "Buscando cursos..."
+                  : "No tienes cursos asignados como profesor."}
               </p>
             </div>
           </CardContent>

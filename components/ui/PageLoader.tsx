@@ -3,7 +3,7 @@
 import { usePageLoader } from "@/hooks/usePageLoader";
 import { Suspense } from "react";
 
-function PageLoaderContent() {
+export function PageLoaderContent() {
   const loading = usePageLoader();
 
   if (!loading) return null;
