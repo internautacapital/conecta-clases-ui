@@ -1,4 +1,4 @@
-import { getCourses, getCourseWork, getStudentSubmissions, getStudents } from "@/lib/google"
+import { getCourses, getCourseWork, getStudentSubmissions, getCurrentUserProfile, type StudentSubmission } from "@/lib/google"
 
 export type Assignment = {
   id: string
@@ -8,6 +8,7 @@ export type Assignment = {
   dueDate?: string
   status: 'pending' | 'submitted' | 'late'
   submissionState?: string
+  alternateLink?: string
 }
 
 export type CourseProgress = {
@@ -17,6 +18,7 @@ export type CourseProgress = {
   totalAssignments: number
   completedAssignments: number
   averageGrade?: number
+  alternateLink?: string
 }
 
 export type StudentDashboardData = {
@@ -36,6 +38,12 @@ export type StudentDashboardData = {
 
 export async function getStudentDashboardData(userEmail: string): Promise<StudentDashboardData> {
   try {
+    // Get current user profile to get the real userId
+    const userProfile = await getCurrentUserProfile()
+    const currentUserId = userProfile.userId
+    
+    console.log('Current user profile:', userProfile)
+    
     // Get all courses for the user
     const courses = await getCourses(userEmail)
     
@@ -68,10 +76,17 @@ export async function getStudentDashboardData(userEmail: string): Promise<Studen
           try {
             const submissions = await getStudentSubmissions(course.id, work.id)
             const userSubmission = submissions.find(sub => 
-              sub.userId && sub.userId.includes(userEmail.split('@')[0])
+              sub.userId === currentUserId
             )
+
+            console.log('Submissions for assignment:', work.title, {
+              submissions,
+              currentUserId,
+              userSubmission
+            })
             
             if (userSubmission) {
+              // Check if assignment is completed based on state
               if (userSubmission.state === 'TURNED_IN' || userSubmission.state === 'RETURNED') {
                 completedCount++
               }
@@ -96,7 +111,8 @@ export async function getStudentDashboardData(userEmail: string): Promise<Studen
           progressPercent,
           totalAssignments,
           completedAssignments: completedCount,
-          averageGrade
+          averageGrade,
+          alternateLink: course.alternateLink
         }
       } catch (error) {
         console.warn(`Failed to get progress for course ${course.id}:`, error)
@@ -105,7 +121,8 @@ export async function getStudentDashboardData(userEmail: string): Promise<Studen
           courseName: course.name || 'Sin nombre',
           progressPercent: 0,
           totalAssignments: 0,
-          completedAssignments: 0
+          completedAssignments: 0, 
+          alternateLink: undefined,
         }
       }
     })
@@ -130,25 +147,50 @@ export async function getStudentDashboardData(userEmail: string): Promise<Studen
           
           const submissions = await getStudentSubmissions(course.id, work.id)
           const userSubmission = submissions.find(sub => 
-            sub.userId && sub.userId.includes(userEmail.split('@')[0])
+            sub.userId === currentUserId
           )
           
-          const isSubmitted = userSubmission && 
-            (userSubmission.state === 'TURNED_IN' || userSubmission.state === 'RETURNED')
-          
-          if (!isSubmitted) {
-            upcomingAssignments.push({
-              id: work.id,
-              title: work.title || 'Tarea sin título',
-              courseId: course.id,
-              courseName: course.name || 'Sin nombre',
-              dueDate: work.dueDate ? 
-                `${work.dueDate.year}-${String(work.dueDate.month).padStart(2, '0')}-${String(work.dueDate.day).padStart(2, '0')}` 
-                : undefined,
-              status: 'pending',
-              submissionState: userSubmission?.state || undefined
+          // Determine assignment status based on submission state
+          const getAssignmentStatus = (submission?: StudentSubmission): 'pending' | 'submitted' | 'late' => {
+            if (!submission) return 'pending'
+            
+            console.log('Determining status for submission:', {
+              state: submission.state,
+              late: submission.late,
+              userId: submission.userId
             })
+            
+            switch (submission.state) {
+              case 'TURNED_IN':
+              case 'RETURNED':
+                return 'submitted'
+              case 'NEW':
+              case 'CREATED':
+              case 'SUBMISSION_STATE_UNSPECIFIED':
+                return submission.late ? 'late' : 'pending'
+              case 'RECLAIMED_BY_STUDENT':
+                return 'pending' // Student reclaimed, so it's pending again
+              default:
+                console.warn('Unknown submission state:', submission.state)
+                return 'pending'
+            }
           }
+          
+          const assignmentStatus = getAssignmentStatus(userSubmission)
+          
+          // Include all assignments (both pending and completed) to show full status
+          upcomingAssignments.push({
+            id: work.id,
+            title: work.title || 'Tarea sin título',
+            courseId: course.id,
+            courseName: course.name || 'Sin nombre',
+            dueDate: work.dueDate ? 
+              `${work.dueDate.year}-${String(work.dueDate.month).padStart(2, '0')}-${String(work.dueDate.day).padStart(2, '0')}` 
+              : undefined,
+            status: assignmentStatus,
+            submissionState: userSubmission?.state || 'NEW',
+            alternateLink: work.alternateLink || undefined
+          })
         }
       } catch (error) {
         console.warn(`Failed to get upcoming assignments for course ${course.id}:`, error)

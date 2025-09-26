@@ -32,6 +32,20 @@ export type Announcement = {
   updateTime?: string | null
 }
 
+export type StudentSubmission = {
+  id?: string | null
+  userId?: string | null
+  courseId: string
+  courseWorkId: string
+  state: 'SUBMISSION_STATE_UNSPECIFIED' | 'NEW' | 'CREATED' | 'TURNED_IN' | 'RETURNED' | 'RECLAIMED_BY_STUDENT' | string
+  assignedGrade?: number | null
+  draftGrade?: number | null
+  alternateLink?: string | null
+  creationTime?: string | null
+  updateTime?: string | null
+  late?: boolean | null
+}
+
 export async function getAnnouncements(courseId: string): Promise<Announcement[]> {
   requireAuth()
   const classroom = getClassroom()
@@ -73,6 +87,9 @@ function getClassroom(): classroom_v1.Classroom {
 export async function getCourses(userEmail: string) {
   requireAuth()
   const classroom = getClassroom()
+
+  console.log({classroom})
+
   // List active courses for the authenticated user
   const res = await classroom.courses.list({
     courseStates: ["ACTIVE"],
@@ -91,7 +108,7 @@ export async function getCourseWork(courseId: string) {
   return res.data.courseWork ?? []
 }
 
-export async function getStudentSubmissions(courseId: string, courseworkId: string, userId?: string) {
+export async function getStudentSubmissions(courseId: string, courseworkId: string, userId?: string): Promise<StudentSubmission[]> {
   requireAuth()
   const classroom = getClassroom()
   const res = await classroom.courses.courseWork.studentSubmissions.list({
@@ -101,7 +118,48 @@ export async function getStudentSubmissions(courseId: string, courseworkId: stri
     userId: userId ?? undefined,
     pageSize: 100,
   })
-  return res.data.studentSubmissions ?? []
+  
+  const submissions = res.data.studentSubmissions ?? []
+  
+  return submissions.map(sub => {
+    
+    // Ensure state is properly set, default to 'NEW' if undefined
+    const submissionState = sub.state || 'NEW'
+    
+    return {
+      id: sub.id,
+      userId: sub.userId,
+      courseId,
+      courseWorkId: courseworkId,
+      state: submissionState as 'SUBMISSION_STATE_UNSPECIFIED' | 'NEW' | 'CREATED' | 'TURNED_IN' | 'RETURNED' | 'RECLAIMED_BY_STUDENT' | string,
+      assignedGrade: sub.assignedGrade,
+      draftGrade: sub.draftGrade,
+      alternateLink: sub.alternateLink,
+      creationTime: sub.creationTime,
+      updateTime: sub.updateTime,
+      late: sub.late
+    }
+  })
+}
+
+export async function getCurrentUserProfile() {
+  requireAuth()
+  const classroom = getClassroom()
+  
+  try {
+    const res = await classroom.userProfiles.get({
+      userId: 'me'
+    })
+    
+    return {
+      userId: res.data.id,
+      name: res.data.name?.fullName,
+      email: res.data.emailAddress
+    }
+  } catch (error) {
+    console.error('Failed to get current user profile:', error)
+    throw error
+  }
 }
 
 export async function getStudents(courseId: string) {

@@ -3,6 +3,7 @@
 import { HelpCircle } from "lucide-react"
 import { useTour } from "@/contexts/TourContext"
 import { useState } from "react"
+import { useSession } from "next-auth/react"
 
 interface HelpButtonProps {
   className?: string
@@ -12,18 +13,19 @@ interface HelpButtonProps {
 export function HelpButton({ className = "", variant = "floating" }: HelpButtonProps) {
   const { startTour } = useTour()
   const [isHovered, setIsHovered] = useState(false)
+  const { data: session } = useSession()
 
   const handleClick = () => {
     startTour()
   }
 
-  if (variant === "floating") {
+  if (variant === "floating" && session?.user) {
     return (
       <button
         onClick={handleClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110 ${className}`}
+        className={`fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 cursor-pointer hover:scale-110 ${className}`}
         title="Ayuda - Tour de la plataforma"
       >
         <HelpCircle className="w-6 h-6" />
