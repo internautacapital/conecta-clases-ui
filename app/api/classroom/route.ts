@@ -12,18 +12,16 @@ export async function GET() {
     }
 
     const accessToken = session.accessToken
-    const userEmail = session.user?.email || ""
-
     if (!accessToken) {
       return NextResponse.json({ error: "Missing Google access token in session" }, { status: 400 })
     }
 
     setAccessToken(accessToken)
 
-    const courses = await getCourses(userEmail)
+    const courses = await getCourses()
 
     return NextResponse.json({ courses })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("/api/classroom error:", error)
      return createErrorResponse(error, 500, true)
   }

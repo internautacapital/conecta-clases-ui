@@ -1,8 +1,9 @@
 "use client"
 
+import { Suspense } from "react"
 import { usePageLoader } from "@/hooks/usePageLoader"
 
-export function PageLoader() {
+function PageLoaderContent() {
   const loading = usePageLoader()
 
   if (!loading) return null
@@ -29,5 +30,13 @@ export function PageLoader() {
         </div>
       </div>
     </div>
+  )
+}
+
+export function PageLoader() {
+  return (
+    <Suspense fallback={null}>
+      <PageLoaderContent />
+    </Suspense>
   )
 }

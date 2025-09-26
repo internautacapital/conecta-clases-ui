@@ -1,14 +1,17 @@
 "use client"
 
-import { usePathname, useSearchParams } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useClientOnly } from "./useClientOnly"
 
 export function usePageLoader() {
   const [loading, setLoading] = useState(false)
+  const isClient = useClientOnly()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
 
   useEffect(() => {
+    if (!isClient) return
+    
     // Start loading
     setLoading(true)
     
@@ -20,7 +23,7 @@ export function usePageLoader() {
     return () => {
       clearTimeout(timer)
     }
-  }, [pathname, searchParams])
+  }, [isClient, pathname])
 
   return loading
 }

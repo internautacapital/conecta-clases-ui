@@ -18,13 +18,23 @@ export function errorMiddleware(request: NextRequest) {
  * Función helper para envolver respuestas de error con logout forzado
  */
 export function createErrorResponse(
-  error: any, 
+  error: Error | { message?: string } | string | unknown, 
   status: number = 500,
   forceLogout: boolean = false
 ) {
+  // Extract error message safely
+  let errorMessage = "Internal Server Error"
+  if (error instanceof Error) {
+    errorMessage = error.message
+  } else if (typeof error === "string") {
+    errorMessage = error
+  } else if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
+    errorMessage = error.message
+  }
+
   const response = NextResponse.json(
     { 
-      error: error?.message || "Internal Server Error",
+      error: errorMessage,
       forceLogout,
       redirectTo: forceLogout ? "/" : undefined
     }, 

@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const metrics = await getCourseMetrics(courseId)
 
     return NextResponse.json({ metrics })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("/api/metrics error:", error)
     // Si es un error 500, forzar logout
     return createErrorResponse(error, 500, true)

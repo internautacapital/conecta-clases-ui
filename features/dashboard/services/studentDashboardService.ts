@@ -36,14 +36,14 @@ export type StudentDashboardData = {
   completedAssignments: number
 }
 
-export async function getStudentDashboardData(userEmail: string): Promise<StudentDashboardData> {
+export async function getStudentDashboardData(): Promise<StudentDashboardData> {
   try {
     // Get current user profile to get the real userId
     const userProfile = await getCurrentUserProfile()
     const currentUserId = userProfile.userId
      
     // Get all courses for the user
-    const courses = await getCourses(userEmail)
+    const courses = await getCourses()
     
     const courseProgressPromises = courses.map(async (course) => {
       if (!course.id) return null

@@ -4,6 +4,17 @@ import { getAnnouncements, getCourses, setAccessToken } from "@/lib/google"
 import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
 
+type NotificationItem = {
+  id: string | undefined;
+  courseId: string;
+  courseName: string;
+  text: string;
+  alternateLink: string | null;
+  state: string | null;
+  creationTime: string | null;
+  updateTime: string | null;
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -18,11 +29,11 @@ export async function GET() {
 
     setAccessToken(accessToken)
 
-    const courses = await getCourses(session.user?.email || "")
+    const courses = await getCourses()
 
     const all = await Promise.all(
       (courses || []).map(async (c) => {
-        if (!c.id) return [] as any[]
+        if (!c.id) return [] as NotificationItem[]
         const anns = await getAnnouncements(c.id)
         return anns.map((a) => ({
           id: a.id,
@@ -45,7 +56,7 @@ export async function GET() {
     })
 
     return NextResponse.json({ announcements: flat })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("/api/notifications error:", error)
     // Si es un error 500, forzar logout
     return createErrorResponse(error, 500, true)

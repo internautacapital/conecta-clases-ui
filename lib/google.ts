@@ -84,7 +84,7 @@ function getClassroom(): classroom_v1.Classroom {
   return google.classroom({ version: "v1", auth: oauth2Client })
 }
 
-export async function getCourses(userEmail: string) {
+export async function getCourses() {
   requireAuth()
   const classroom = getClassroom()
 
