@@ -1,4 +1,4 @@
-import { getCourses, getCourseWork, getStudentSubmissions, getCurrentUserProfile, type StudentSubmission } from "@/lib/google"
+import { getCourses, getCourseWork, getCurrentUserProfile, getStudentSubmissions, type StudentSubmission } from "@/lib/google"
 
 export type Assignment = {
   id: string
@@ -41,9 +41,7 @@ export async function getStudentDashboardData(userEmail: string): Promise<Studen
     // Get current user profile to get the real userId
     const userProfile = await getCurrentUserProfile()
     const currentUserId = userProfile.userId
-    
-    console.log('Current user profile:', userProfile)
-    
+     
     // Get all courses for the user
     const courses = await getCourses(userEmail)
     
@@ -78,12 +76,6 @@ export async function getStudentDashboardData(userEmail: string): Promise<Studen
             const userSubmission = submissions.find(sub => 
               sub.userId === currentUserId
             )
-
-            console.log('Submissions for assignment:', work.title, {
-              submissions,
-              currentUserId,
-              userSubmission
-            })
             
             if (userSubmission) {
               // Check if assignment is completed based on state

@@ -1,12 +1,11 @@
 "use client"
 
+import { HelpButton } from "@/components/ui/HelpButton"
+import { LoadingLink } from "@/components/ui/LoadingLink"
 import { NotificationBell } from "@/features/notifications/components/NotificationBell"
 import { BarChart3, Home, LogOut, Menu, TrendingUp, X } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
-import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LoadingLink } from "@/components/ui/LoadingLink"
-import { HelpButton } from "@/components/ui/HelpButton"
 import * as React from "react"
 
 export function Navbar() {

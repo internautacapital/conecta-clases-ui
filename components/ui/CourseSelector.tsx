@@ -1,7 +1,7 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
 import { ChevronDown } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 interface Course {
