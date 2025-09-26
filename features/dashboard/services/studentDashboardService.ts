@@ -144,14 +144,7 @@ export async function getStudentDashboardData(userEmail: string): Promise<Studen
           
           // Determine assignment status based on submission state
           const getAssignmentStatus = (submission?: StudentSubmission): 'pending' | 'submitted' | 'late' => {
-            if (!submission) return 'pending'
-            
-            console.log('Determining status for submission:', {
-              state: submission.state,
-              late: submission.late,
-              userId: submission.userId
-            })
-            
+            if (!submission) return 'pending'            
             switch (submission.state) {
               case 'TURNED_IN':
               case 'RETURNED':

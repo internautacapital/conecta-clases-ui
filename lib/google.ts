@@ -88,8 +88,6 @@ export async function getCourses(userEmail: string) {
   requireAuth()
   const classroom = getClassroom()
 
-  console.log({classroom})
-
   // List active courses for the authenticated user
   const res = await classroom.courses.list({
     courseStates: ["ACTIVE"],
