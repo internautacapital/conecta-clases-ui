@@ -36,8 +36,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Validate required fields
     if (
       !taskId ||
       !taskTitle ||
@@ -51,7 +49,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Filter students with valid email addresses
     const studentsWithEmail = students.filter((student) => student.email);
 
     if (studentsWithEmail.length === 0) {
@@ -104,9 +101,6 @@ Este mensaje fue enviado automáticamente desde Conecta Clases.`;
 
     // Send emails using Gmail API
     const results = await sendBatchGmailMessages(emailMessages, 500); // 500ms delay between emails
-
-    // Log results
-    console.log("Email sending results:", results);
 
     if (results.failed > 0) {
       console.error("Some emails failed to send:", results.errors);

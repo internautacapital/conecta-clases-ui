@@ -3,11 +3,10 @@ import { createErrorResponse } from "@/lib/errorMiddleware";
 import {
   getCourses,
   getCourseWork,
-  getStudentSubmissions,
   getStudents,
-  setAccessToken,
-  type StudentSubmission,
+  getStudentSubmissions,
   getUserProfile,
+  setAccessToken,
 } from "@/lib/google";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -70,28 +69,6 @@ export async function GET() {
           try {
             // Get all submissions for this coursework
             const submissions = await getStudentSubmissions(course.id, work.id);
-
-            // Helper function to get email from userId or student data
-            const getStudentEmail = (
-              student: { userId: string; name: string; email?: string },
-              submission: StudentSubmission | undefined
-            ) => {
-              // First try student.email from the students list
-              if (student.email) return student.email;
-
-              // If userId looks like an email, use it
-              if (student.userId && student.userId.includes("@")) {
-                return student.userId;
-              }
-
-              // If submission userId looks like an email, use it
-              if (submission?.userId && submission.userId.includes("@")) {
-                return submission.userId;
-              }
-
-              return undefined;
-            };
-
             // Find students with pending submissions and get their details
             const pendingStudentsPromises = students
               .filter((student) => {

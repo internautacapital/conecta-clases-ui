@@ -1,12 +1,12 @@
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
+import { PendingTasksView } from "@/features/teacher/components/PendingTasksView";
+import { MyCourses } from "@/features/teacher/components/Dashboard";
 import { authOptions } from "@/lib/auth";
-import { PendingTasksView } from "@/features/notifications/components/PendingTasksView";
-import { Dashboard } from "@/features/dashboard/components/Dashboard";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function NotificationsPage() {
+export default async function TeacherPage() {
   const session = await getServerSession(authOptions);
   if (!session) {
     redirect("/login");
@@ -34,7 +34,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <Dashboard />
+      <MyCourses />
       <PendingTasksView />
     </div>
   );

@@ -8,23 +8,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AlertCircle, RefreshCw, UserCheck } from "lucide-react";
-import { useDashboard } from "../hooks/useDashboard";
-import { CourseCard } from "./CourseCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CourseCard } from "@/features/teacher/components/CourseCard";
+import { useTeacherDashboard } from "@/features/teacher/hooks/useDashboard";
+import { AlertCircle, RefreshCw } from "lucide-react";
 
-export function Dashboard() {
-  const { data, isLoading, error, refetch, isRefetching } = useDashboard();
+export function MyCourses() {
+  const { data, isLoading, error, refetch, isRefetching } =
+    useTeacherDashboard();
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="text-center">
-            <UserCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Buscando cursos...</h3>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        {[1, 2, 3].map((i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-20 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     );
   }
 
@@ -82,21 +93,23 @@ export function Dashboard() {
       </div>
 
       {teacherCourses.length === 0 ? (
-        <Card>
-          <CardContent className="flex items-center justify-center py-8">
-            <div className="text-center">
-              <UserCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">
-                No hay cursos como profesor
-              </h3>
-              <p className="text-muted-foreground">
-                {isLoading
-                  ? "Buscando cursos..."
-                  : "No tienes cursos asignados como profesor."}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {teacherCourses.map((course) => (

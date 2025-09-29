@@ -3,13 +3,13 @@ import { createErrorResponse } from "@/lib/errorMiddleware";
 import {
   getCoursesWithRoles,
   getCourseWork,
-  getStudentSubmissions,
   getStudents,
+  getStudentSubmissions,
   setAccessToken,
 } from "@/lib/google";
+import type { classroom_v1 } from "googleapis";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import type { classroom_v1 } from "googleapis";
 
 // Helper function to safely convert Google API string values that can be null to undefined
 function convertNullToUndefined(
@@ -87,7 +87,7 @@ export type DashboardCourse = {
   pendingAssignments: number;
 };
 
-export type DashboardData = {
+export type UserInfo = {
   teacherCourses: DashboardCourse[];
   studentCourses: DashboardCourse[];
   totalCourses: number;
@@ -288,7 +288,7 @@ export async function GET() {
       0
     );
 
-    const dashboardData: DashboardData = {
+    const dashboardData: UserInfo = {
       teacherCourses,
       studentCourses,
       totalCourses,
