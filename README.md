@@ -1,36 +1,189 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📚 Conecta Clases
 
-## Getting Started
+Aplicación construida con **Next.js 15** que integra **autenticación con Google (NextAuth.js)** y conexión con la **API de Google Classroom**.  
+Permite a alumnos, profesores y coordinadores acceder a un **dashboard protegido**, visualizar **cursos, progreso y métricas**, y gestionar roles de forma sencilla.  
+Ideal para proyectos educativos que necesiten **seguimiento de estudiantes, integración con Google y despliegue en Vercel**.
 
-First, run the development server:
+# Configuración de Autenticación con Google
+
+Este proyecto implementa autenticación con Google usando NextAuth.js. Los usuarios se autentican con su email de Google (el mismo que usan en Classroom) y se les asigna un rol (alumno, profesor).
+
+## Configuración Inicial
+
+### 1. Instalar Dependencias
+
+```bash
+npm install
+```
+
+### 2. Configurar Variables de Entorno
+
+Crea un archivo `.env.local` basado en `env.example`:
+
+```bash
+cp env.example .env.local
+```
+
+Completa las variables de entorno:
+
+```env
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=tu-clave-secreta-aqui
+GOOGLE_CLIENT_ID=tu-google-client-id-aqui
+GOOGLE_CLIENT_SECRET=tu-google-client-secret-aqui
+```
+
+### 3. Configurar Google OAuth
+
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
+2. Crea un nuevo proyecto o selecciona uno existente
+3. Habilita la Google+ API
+4. Ve a "Credentials" y crea un "OAuth 2.0 Client ID"
+5. Configura las URLs autorizadas:
+   - **Authorized JavaScript origins**: `http://localhost:3000`
+   - **Authorized redirect URIs**: `http://localhost:3000/api/auth/callback/google`
+6. Copia el Client ID y Client Secret a tu archivo `.env.local`
+
+Además, habilita la API de Google Classroom para tu proyecto en Google Cloud Console (APIs & Services > Library > Classroom API > Enable).
+
+### 4. Generar NEXTAUTH_SECRET
+
+Puedes generar una clave secreta usando:
+
+```bash
+openssl rand -base64 32
+```
+
+O usando Node.js:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+## Estructura de Archivos Creados
+
+```
+├── app/
+│   ├── (auth)/
+│   │   └── login/
+│   │       └── page.tsx          # Página de login con Google
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/
+│   │           └── route.ts       # API route de NextAuth
+│   ├── dashboard/
+│   │   └── page.tsx              # Dashboard protegido
+│   └── layout.tsx                # Layout actualizado con SessionProvider
+├── components/
+│   └── providers.tsx             # SessionProvider wrapper
+├── lib/
+│   └── auth.ts                   # Configuración de NextAuth
+├── types/
+│   └── next-auth.d.ts           # Tipos extendidos para NextAuth
+├── middleware.ts                 # Middleware para proteger rutas
+└── env.example                   # Ejemplo de variables de entorno
+```
+
+## Funcionalidades Implementadas
+
+### ✅ Autenticación con Google
+- Los usuarios se autentican usando su cuenta de Google
+- Compatible con cuentas de Google Classroom
+
+### ✅ Gestión de Roles
+- **Alumno**: Rol por defecto
+- **Profesor**: Para emails que contengan "profesor" o "teacher"
+
+### ✅ Protección de Rutas
+- Las rutas `/dashboard/*` están protegidas
+- Los usuarios no autenticados son redirigidos a `/login`
+
+### ✅ Sesión Persistente
+- La sesión incluye email y rol del usuario
+- Los datos se mantienen entre recargas de página
+
+## Uso
+
+### 1. Iniciar el servidor de desarrollo
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Probar la autenticación
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Ve a `http://localhost:3000/login`
+2. Haz clic en "Continuar con Google"
+3. Autoriza la aplicación
+4. Serás redirigido al dashboard
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Acceder al dashboard
 
-## Learn More
+- URL: `http://localhost:3000/dashboard`
+- Solo accesible para usuarios autenticados
+- Muestra información de la sesión y rol del usuario
 
-To learn more about Next.js, take a look at the following resources:
+## Personalización de Roles
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Para personalizar la lógica de asignación de roles, edita la función `determineUserRole` en `lib/auth.ts`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```typescript
+function determineUserRole(email: string): 'alumno' | 'profesor' | 'coordinador' {
+  if (email.includes('profesor') || email.includes('teacher')) {
+    return 'profesor'
+  }
+  
+  return 'alumno' // Rol por defecto
+}
+```
 
-## Deploy on Vercel
+## Integración con Google Classroom
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Se añadió un cliente de Google Classroom con OAuth 2.0 en `lib/google.ts` y un endpoint en `app/api/classroom/route.ts`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Instalar dependencia
+
+```bash
+npm install googleapis recharts
+```
+
+### Scopes requeridos
+Los scopes necesarios ya están configurados en `lib/auth.ts`:
+
+- `https://www.googleapis.com/auth/classroom.courses.readonly`
+- `https://www.googleapis.com/auth/classroom.coursework.me.readonly`
+- `https://www.googleapis.com/auth/classroom.student-submissions.me.readonly`
+
+### Variables de entorno usadas
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `NEXTAUTH_URL`
+
+### Endpoints disponibles
+- `GET /api/classroom`: retorna los cursos del usuario autenticado (requiere sesión iniciada y permisos aceptados en el consentimiento de Google).
+- `GET /api/notifications`: retorna anuncios de todos los cursos del usuario.
+- `GET /api/metrics?courseId=ID`: retorna métricas semanales de un curso específico.
+
+Ejemplo (una vez autenticado en el navegador):
+
+```bash
+curl -X GET http://localhost:3000/api/classroom
+curl -X GET http://localhost:3000/api/metrics?courseId=123456
+```
+
+### Páginas disponibles
+- `/dashboard/progress`: tabla de progreso de estudiantes por curso
+- `/dashboard/metrics`: gráficos de métricas semanales (asistencia, entregas, participación)
+
+## Próximos Pasos
+
+1. **Base de Datos**: Conectar a una base de datos para gestionar usuarios y roles
+2. **Roles Dinámicos**: Implementar un sistema de gestión de roles más flexible (coordinador)
+3. **UI Mejorada**: Mejorar la interfaz de usuario del login y dashboard
+
+
+### Error: "Invalid client_id"
+Verifica que el `GOOGLE_CLIENT_ID` en `.env.local` sea correcto y que las URLs autorizadas estén configuradas correctamente en Google Cloud Console.
+
+### Error: "NEXTAUTH_SECRET missing"
+Asegúrate de tener `NEXTAUTH_SECRET` configurado en tu archivo `.env.local`.
