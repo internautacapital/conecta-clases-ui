@@ -128,7 +128,7 @@ npm run dev
 Para personalizar la lógica de asignación de roles, edita la función `determineUserRole` en `lib/auth.ts`:
 
 ```typescript
-function determineUserRole(email: string): 'alumno' | 'profesor' | 'coordinador' {
+function determineUserRole(email: string): 'alumno' | 'profesor' {
   if (email.includes('profesor') || email.includes('teacher')) {
     return 'profesor'
   }

@@ -1,9 +1,9 @@
 "use client"
 
-import { HelpCircle } from "lucide-react"
 import { useTour } from "@/contexts/TourContext"
-import { useState } from "react"
+import { HelpCircle } from "lucide-react"
 import { useSession } from "next-auth/react"
+import { useState } from "react"
 
 interface HelpButtonProps {
   className?: string
@@ -42,13 +42,15 @@ export function HelpButton({ className = "", variant = "floating" }: HelpButtonP
   }
 
   return (
-    <button
-      onClick={handleClick}
-      className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors ${className}`}
-      title="Iniciar tour de ayuda"
-    >
-      <HelpCircle className="w-4 h-4" />
-      Ayuda
-    </button>
+      session && (
+      <button
+        onClick={handleClick}
+        className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors ${className}`}
+        title="Iniciar tour de ayuda"
+      >
+        <HelpCircle className="w-4 h-4" />
+        Ayuda
+      </button>
+      )
   )
 }

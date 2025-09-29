@@ -16,8 +16,8 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import * as React from "react";
-import { Skeleton } from "./skeleton";
 import { Badge } from "./badge";
+import { Skeleton } from "./skeleton";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -242,9 +242,11 @@ export function Navbar() {
             })}
 
             {/* Help button in mobile menu */}
-            <div className="px-3 py-2">
-              <HelpButton variant="inline" className="w-full justify-start" />
-            </div>
+            {session && (
+              <div className="px-3 py-2">
+                <HelpButton variant="inline" className="w-full justify-start" />
+              </div>
+            )}
           </div>
         </div>
       )}

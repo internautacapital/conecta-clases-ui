@@ -158,12 +158,6 @@ export default function Home() {
                 href="#"
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                Términos de Servicio
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-white transition-colors"
-              >
                 Política de Privacidad
               </a>
               <a
