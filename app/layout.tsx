@@ -20,7 +20,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Conecta Clases - Semillero Digital",
-  description: "Plataforma educativa para gestión de clases y seguimiento de estudiantes",
+  description:
+    "Plataforma educativa para gestión de clases y seguimiento de estudiantes",
 };
 
 export default function RootLayout({
@@ -39,9 +40,7 @@ export default function RootLayout({
           <TourInitializer />
           <PageLoader />
           <Navbar />
-          <main className="min-h-screen bg-background">
-            {children}
-          </main>
+          <main className="min-h-screen bg-background">{children}</main>
           <HelpButton />
         </Providers>
       </body>
