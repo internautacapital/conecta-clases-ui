@@ -6,13 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToastNotification } from "@/components/ui/Toast";
 import { usePendingTasks } from "@/hooks/usePendingTasks";
-import { AlertCircle, Calendar, Mail, RefreshCw, Users } from "lucide-react";
+import {
+  AlertCircle,
+  Calendar,
+  Mail,
+  RefreshCw,
+  Send,
+  Users,
+} from "lucide-react";
 import React from "react";
-import { useSendReminderMutation } from "../hooks/useSendRemiderMutation";
+import { useSendMassReminderMutation } from "../hooks/useSendMassReminderMutation";
+import { useSendReminderMutation } from "../hooks/useSendReminderMutation";
 
 export function PendingTasksView() {
-  const { data, isLoading, error, refetch, isRefetching, isFetching } =
-    usePendingTasks();
+  const { data, isLoading, error, refetch, isFetching } = usePendingTasks();
 
   const [open, setOpen] = React.useState(false);
   const eventDateRef = React.useRef(new Date());
@@ -29,6 +36,13 @@ export function PendingTasksView() {
     isSuccess,
   } = useSendReminderMutation();
 
+  const {
+    mutate: sendMassReminder,
+    isPending: isMassPending,
+    isError: isMassError,
+    isSuccess: isMassSuccess,
+  } = useSendMassReminderMutation();
+
   function oneWeekAway(): Date {
     const now = new Date();
     now.setDate(now.getDate() + 7);
@@ -44,7 +58,7 @@ export function PendingTasksView() {
 
   // Handle success state for sending reminder
   React.useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess || isMassSuccess) {
       setOpen(true);
       window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
@@ -52,7 +66,7 @@ export function PendingTasksView() {
         setOpen(true);
       }, 100);
     }
-  }, [isSuccess]);
+  }, [isSuccess, isMassSuccess]);
 
   if (isLoading && isFetching) {
     return (
@@ -131,17 +145,26 @@ export function PendingTasksView() {
             pendientes
           </p>
         </div>
-        <Button
-          onClick={() => refetch()}
-          variant="outline"
-          size="sm"
-          disabled={isRefetching}
-        >
-          <RefreshCw
-            className={`h-4 w-4 mr-2 ${isRefetching ? "animate-spin" : ""}`}
-          />
-          Actualizar
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => {
+              sendMassReminder({
+                tasks: pendingTasks.map((task) => ({
+                  taskId: task.taskId,
+                  taskTitle: task.taskTitle,
+                  courseName: task.courseName,
+                  dueDate: task.dueDate,
+                  students: task.pendingStudents,
+                })),
+              });
+            }}
+            disabled={isMassPending || totalPendingStudents === 0}
+            size="sm"
+          >
+            <Send className="h-4 w-4 mr-2" />
+            Enviar a Todos ({totalPendingStudents})
+          </Button>
+        </div>
       </div>
 
       {/* Tasks list */}
@@ -243,12 +266,32 @@ export function PendingTasksView() {
                     </div>
                   </Button>
                 </div>
-                {isError && <div>Error al enviar recordatorio</div>}
+                {isError && (
+                  <div className="text-sm text-red-500">
+                    Error al enviar recordatorio
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* Mass reminder error */}
+      {isMassError && (
+        <Card className="border-red-500">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-2 text-red-500">
+              <AlertCircle className="h-5 w-5" />
+              <p className="font-medium">
+                Error al enviar recordatorios masivos. Por favor, intenta de
+                nuevo.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <ToastNotification
         open={open}
         setOpen={setOpen}

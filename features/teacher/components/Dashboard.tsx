@@ -11,11 +11,19 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { CourseCard } from "@/features/teacher/components/CourseCard";
 import { useTeacherDashboard } from "@/features/teacher/hooks/useDashboard";
+import { usePendingTasks } from "@/hooks/usePendingTasks";
 import { AlertCircle, RefreshCw } from "lucide-react";
 
 export function MyCourses() {
   const { data, isLoading, error, refetch, isRefetching, isFetching } =
     useTeacherDashboard();
+
+  const { refetch: refetchPendingTasks } = usePendingTasks();
+
+  const update = () => {
+    refetchPendingTasks();
+    refetch();
+  };
 
   if (isLoading && isFetching) {
     return (
@@ -80,7 +88,7 @@ export function MyCourses() {
           </p>
         </div>
         <Button
-          onClick={() => refetch()}
+          onClick={() => update()}
           variant="outline"
           size="sm"
           disabled={isRefetching}
