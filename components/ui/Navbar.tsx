@@ -16,7 +16,7 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
-import { RoleBadge } from "./RoleBadge";
+import { RoleBadge } from "@/components/ui/RoleBadge";
 
 export function Navbar() {
   const pathname = usePathname();

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToastNotification } from "@/components/ui/Toast";
+import { useSendMassReminderMutation } from "@/features/teacher/hooks/useSendMassReminderMutation";
+import { useSendReminderMutation } from "@/features/teacher/hooks/useSendReminderMutation";
 import { usePendingTasks } from "@/hooks/usePendingTasks";
 import {
   AlertCircle,
@@ -15,8 +17,6 @@ import {
   Users,
 } from "lucide-react";
 import React from "react";
-import { useSendMassReminderMutation } from "../hooks/useSendMassReminderMutation";
-import { useSendReminderMutation } from "../hooks/useSendReminderMutation";
 
 export function PendingTasksView() {
   const { data, isLoading, error, refetch, isFetching } = usePendingTasks();

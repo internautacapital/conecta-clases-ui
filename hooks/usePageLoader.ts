@@ -1,8 +1,8 @@
 "use client"
 
+import { useClientOnly } from "@/hooks/useClientOnly"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
-import { useClientOnly } from "./useClientOnly"
 
 export function usePageLoader() {
   const [loading, setLoading] = useState(false)

@@ -1,6 +1,6 @@
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
-import { Skeleton } from "./skeleton";
-import { Badge } from "./badge";
 
 interface RoleBadgeProps {
   isLoading: boolean;

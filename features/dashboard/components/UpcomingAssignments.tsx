@@ -1,7 +1,7 @@
 "use client"
 
+import type { Assignment } from "@/features/dashboard/services/studentDashboardService"
 import { useClientOnly } from "@/hooks/useClientOnly"
-import type { Assignment } from "../services/studentDashboardService"
 
 type Props = {
   assignments: Assignment[]

@@ -1,6 +1,6 @@
 "use client"
 
-import type { StudentDashboardData } from "../services/studentDashboardService"
+import type { StudentDashboardData } from "@/features/dashboard/services/studentDashboardService"
 
 type Props = {
   data: StudentDashboardData
