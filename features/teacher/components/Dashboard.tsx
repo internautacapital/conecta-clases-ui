@@ -27,13 +27,9 @@ export function MyCourses() {
 
   if (isLoading && isFetching) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-10 w-32" />
-        </div>
+      <div className="flex flex-row space-y-4 justify-around gap-3">
         {[1, 2, 3].map((i) => (
-          <Card key={i}>
+          <Card className="w-1/3 h-64" key={i}>
             <CardHeader>
               <Skeleton className="h-6 w-3/4" />
               <Skeleton className="h-4 w-1/2" />
