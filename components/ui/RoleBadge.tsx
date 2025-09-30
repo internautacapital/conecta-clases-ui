@@ -11,7 +11,7 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({ isLoading, roles }) => {
   if (isLoading) {
     return (
       <div className="flex items-center">
-        <Skeleton className="h-[20px] w-[150px] rounded-sm bg-gray-300" />
+        <Skeleton className="h-[20px] w-[150px] rounded-sm bg-gray-200" />
       </div>
     );
   }
