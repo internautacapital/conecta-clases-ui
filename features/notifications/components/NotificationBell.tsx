@@ -35,12 +35,14 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-96 overflow-hidden rounded-md border bg-white shadow-lg">
-          <div className="flex items-center justify-between px-3 py-2 border-b">
-            <div className="text-sm font-medium">Anuncios de Classroom</div>
-            <button onClick={() => refetch()} className="text-xs text-blue-600 hover:underline cursor-pointer">Actualizar</button>
+        <div className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-auto sm:mt-2 z-50 w-[calc(100vw-1rem)] sm:w-96 max-w-none overflow-hidden rounded-lg border bg-white shadow-xl">
+          <div className="flex items-center justify-between px-3 py-2 border-b bg-gray-50">
+            <div className="text-sm font-medium text-gray-900">Anuncios de Classroom</div>
+            <button onClick={() => refetch()} className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer">
+              Actualizar
+            </button>
           </div>
-          <div className="max-h-96 overflow-auto">
+          <div className="max-h-[60vh] sm:max-h-96 overflow-auto">
             {isLoading && (
               <div className="p-4 text-sm text-muted-foreground">Cargando…</div>
             )}
@@ -50,21 +52,27 @@ export function NotificationBell() {
             {!isLoading && !isError && items.length === 0 && (
               <div className="p-4 text-sm text-muted-foreground">Sin notificaciones</div>
             )}
-            <ul className="divide-y">
+            <ul className="divide-y divide-gray-100">
               {items.map((n) => (
-                <li key={`${n.courseId}-${n.id}`} className="p-3 hover:bg-gray-50">
+                <li key={`${n.courseId}-${n.id}`} className="hover:bg-gray-50 transition-colors">
                   <a
                     href={n.alternateLink || `https://classroom.google.com/c/${n.courseId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block"
+                    className="block p-3 sm:p-4"
                   >
-                    <div className="text-sm font-medium truncate">{n.courseName}</div>
-                    <div className="mt-1 text-sm text-gray-700 line-clamp-2">
-                      {n.text || "(Sin contenido)"}
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="text-sm font-semibold text-gray-900 truncate flex-1">
+                        {n.courseName}
+                      </div>
+                      <div className="text-xs text-gray-500 whitespace-nowrap bg-gray-100 px-2 py-1 rounded-full">
+                        {n.creationTime ? formatRelativeDate(n.creationTime) : ""}
+                      </div>
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {n.creationTime ? formatRelativeDate(n.creationTime) : ""}
+                    <div className="text-sm text-gray-700 leading-relaxed">
+                      <div className="line-clamp-3 sm:line-clamp-4">
+                        {n.text || "(Sin contenido)"}
+                      </div>
                     </div>
                   </a>
                 </li>

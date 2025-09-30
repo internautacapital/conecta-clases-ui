@@ -86,9 +86,9 @@ export function UpcomingAssignments({ assignments }: Props) {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Mis Tareas</h2>
-        <div className="flex gap-2">
+      <div className="flex items-center justify-between mb-4 flex-wrap flex-col md:flex-row items-start">
+        <h2 className="text-xl font-semibold text-gray-900 ">Mis Tareas</h2>
+        <div className="flex gap-2 mt-2 md:mt-0">
           {pendingCount > 0 && (
             <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
               {pendingCount} pendientes
@@ -117,8 +117,8 @@ export function UpcomingAssignments({ assignments }: Props) {
                 key={assignment.id}
                 className={`border rounded-lg p-4 ${getUrgencyColor(daysUntilDue, assignment.status)}`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                <div className="flex justify-between flex-col md:flex-row items-end md:items-start">
+                  <div className="flex-1 w-full">
                     <h3 className="font-medium text-gray-900 text-sm mb-1">
                       {assignment.title}
                     </h3>
@@ -137,7 +137,7 @@ export function UpcomingAssignments({ assignments }: Props) {
                       </span>
                     </div>
                   </div>
-                  <div className="ml-4">
+                  <div className="mt-4 md:mt-0 ">
                     {assignment.alternateLink ? (
                       <a
                         href={assignment.alternateLink}

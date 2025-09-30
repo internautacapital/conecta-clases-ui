@@ -2,8 +2,8 @@
 
 import { HelpButton } from "@/components/ui/HelpButton";
 import { LoadingLink } from "@/components/ui/LoadingLink";
-import { useGetRole } from "@/hooks/useGetRole";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
+import { useGetRole } from "@/hooks/useGetRole";
 import {
   BarChart3,
   Home,
@@ -23,21 +23,34 @@ export function Navbar() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
+  
+  // Refs for click outside detection
+  const mobileMenuRef = React.useRef<HTMLDivElement>(null);
+  const userMenuRef = React.useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useGetRole();
   // Close menus when clicking outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as HTMLElement;
-      if (!target.closest("[data-user-menu]")) {
+      
+      // Close user menu if clicked outside
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
         setUserMenuOpen(false);
       }
-      if (!target.closest("[data-mobile-menu]")) {
+      
+      // Close mobile menu if clicked outside (but not on navigation links)
+      const isNavLink = target.closest('a[href]');
+      const isMobileMenuButton = target.closest('button') && target.closest('.md\\:hidden');
+      const isMobileMenuArea = target.closest('.md\\:hidden.border-t');
+      
+      if (!isMobileMenuButton && !isMobileMenuArea && !isNavLink) {
         setMobileMenuOpen(false);
       }
     }
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSignOut = () => {
@@ -148,7 +161,7 @@ export function Navbar() {
 
           {/* User menu */}
           {session && (
-            <div className="relative" data-user-menu data-tour="user-menu">
+            <div ref={userMenuRef} className="relative" data-tour="user-menu">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
@@ -189,7 +202,7 @@ export function Navbar() {
 
           {/* Mobile menu button - only show when authenticated */}
           {session && (
-            <div className="md:hidden" data-mobile-menu>
+            <div className="md:hidden">
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
@@ -227,13 +240,6 @@ export function Navbar() {
                 </LoadingLink>
               );
             })}
-
-            {/* Help button in mobile menu */}
-            {session && (
-              <div className="px-3 py-2">
-                <HelpButton variant="inline" className="w-full justify-start" />
-              </div>
-            )}
           </div>
         </div>
       )}

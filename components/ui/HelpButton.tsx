@@ -45,7 +45,7 @@ export function HelpButton({ className = "", variant = "floating" }: HelpButtonP
       session && (
       <button
         onClick={handleClick}
-        className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors ${className}`}
+        className={`items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors ${className}`}
         title="Iniciar tour de ayuda"
       >
         <HelpCircle className="w-4 h-4" />
