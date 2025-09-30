@@ -7,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePendingTasks } from "@/hooks/usePendingTasks";
 import { AlertCircle, Calendar, Mail, RefreshCw, Users } from "lucide-react";
 import { useState } from "react";
-import { useHandleSendReminder } from "../services/useHandleSendRemider";
 
 export function PendingTasksView() {
   const { data, isLoading, error, refetch, isRefetching } = usePendingTasks();
@@ -24,14 +23,36 @@ export function PendingTasksView() {
     setSendingEmails((prev) => [...prev, taskId]);
 
     try {
-      // await useHandleSendReminder(
-      //   taskId,
-      //   taskTitle,
-      //   courseName,
-      //   dueDate,
-      //   students,
-      //   setSendingEmails
-      // );
+      const response = await fetch("/api/send-reminder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          taskId,
+          taskTitle,
+          courseName,
+          dueDate,
+          students,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        let message = `✅ ${result.message}`;
+        if (result.skipped > 0) {
+          message += ` (${result.skipped} estudiantes sin email)`;
+        }
+        if (result.failed > 0) {
+          message += `\n⚠️ ${result.failed} correos fallaron`;
+        }
+        console.log("message :>> ", message);
+      } else {
+        throw new Error(result.message || "Error desconocido");
+      }
     } catch (error) {
       console.error("Error sending reminders:", error);
     } finally {
