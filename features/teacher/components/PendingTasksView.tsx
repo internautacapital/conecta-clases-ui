@@ -23,18 +23,24 @@ export function PendingTasksView() {
 
   const [open, setOpen] = React.useState(false);
   const [sendingTaskId, setSendingTaskId] = React.useState<string | null>(null);
-  const eventDateRef = React.useRef(new Date());
-  const timerRef = React.useRef(0);
-
-  React.useEffect(() => {
-    return () => clearTimeout(timerRef.current);
-  }, []);
+  const [toastData, setToastData] = React.useState<{
+    title: string;
+    description?: string;
+    emailStats?: {
+      sent?: number;
+      failed?: number;
+      skipped?: number;
+      totalTasks?: number;
+    };
+    variant?: "success" | "warning" | "error";
+  }>({ title: "Correos enviados" });
 
   const {
     mutate: sendReminder,
     isPending,
     isError,
     isSuccess,
+    data: reminderData,
   } = useSendReminderMutation();
 
   const {
@@ -42,33 +48,51 @@ export function PendingTasksView() {
     isPending: isMassPending,
     isError: isMassError,
     isSuccess: isMassSuccess,
+    data: massReminderData,
   } = useSendMassReminderMutation();
 
-  function oneWeekAway(): Date {
-    const now = new Date();
-    now.setDate(now.getDate() + 7);
-    return now;
-  }
-
-  function prettyDate(date: Date) {
-    return new Intl.DateTimeFormat("en-US", {
-      dateStyle: "full",
-      timeStyle: "short",
-    }).format(date);
-  }
-
-  // Handle success state for sending reminder
+  // Handle success state for individual reminder
   React.useEffect(() => {
-    if (isSuccess || isMassSuccess) {
+    if (isSuccess && reminderData) {
       setSendingTaskId(null);
+      
+      const variant = reminderData.failed && reminderData.failed > 0 ? "warning" : "success";
+      setToastData({
+        title: "Recordatorio enviado",
+        description: reminderData.message,
+        emailStats: {
+          sent: reminderData.sentTo,
+          failed: reminderData.failed,
+          skipped: reminderData.skipped,
+        },
+        variant,
+      });
+      
       setOpen(true);
-      window.clearTimeout(timerRef.current);
-      timerRef.current = window.setTimeout(() => {
-        eventDateRef.current = oneWeekAway();
-        setOpen(true);
-      }, 100);
     }
-  }, [isSuccess, isMassSuccess]);
+  }, [isSuccess, reminderData]);
+
+  // Handle success state for mass reminder
+  React.useEffect(() => {
+    if (isMassSuccess && massReminderData) {
+      setSendingTaskId(null);
+      
+      const variant = massReminderData.failed > 0 ? "warning" : "success";
+      setToastData({
+        title: "Recordatorios masivos enviados",
+        description: massReminderData.message,
+        emailStats: {
+          sent: massReminderData.sentTo,
+          failed: massReminderData.failed,
+          skipped: massReminderData.skipped,
+          totalTasks: massReminderData.totalTasks,
+        },
+        variant,
+      });
+      
+      setOpen(true);
+    }
+  }, [isMassSuccess, massReminderData]);
 
   React.useEffect(() => {
     if (isError) {
@@ -304,8 +328,10 @@ export function PendingTasksView() {
       <ToastNotification
         open={open}
         setOpen={setOpen}
-        eventDate={eventDateRef.current}
-        prettyDate={prettyDate}
+        title={toastData.title}
+        description={toastData.description}
+        emailStats={toastData.emailStats}
+        variant={toastData.variant}
       />
     </div>
   );

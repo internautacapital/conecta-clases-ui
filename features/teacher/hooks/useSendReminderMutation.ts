@@ -13,8 +13,10 @@ interface SendReminderParams {
 interface SendReminderResponse {
   success: boolean;
   message: string;
-  skipped?: number;
-  failed?: number;
+  sentTo: number;
+  failed: number;
+  skipped: number;
+  errors?: string[];
 }
 
 const sendReminder = async ({
