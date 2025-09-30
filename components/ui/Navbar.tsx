@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { RoleBadge } from "./RoleBadge";
 
@@ -28,7 +28,7 @@ export function Navbar() {
   const mobileMenuRef = React.useRef<HTMLDivElement>(null);
   const userMenuRef = React.useRef<HTMLDivElement>(null);
 
-  const { data, isLoading } = useGetRole();
+  const { data, isLoading } = useGetRole(session);
   // Close menus when clicking outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

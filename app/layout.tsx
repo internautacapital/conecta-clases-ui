@@ -41,7 +41,7 @@ export default function RootLayout({
           <PageLoader />
           <Navbar />
           <main className="min-h-screen bg-background">{children}</main>
-          
+
           <HelpButton />
         </Providers>
       </body>

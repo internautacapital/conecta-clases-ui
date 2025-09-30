@@ -55,8 +55,9 @@ export function PendingTasksView() {
   React.useEffect(() => {
     if (isSuccess && reminderData) {
       setSendingTaskId(null);
-      
-      const variant = reminderData.failed && reminderData.failed > 0 ? "warning" : "success";
+
+      const variant =
+        reminderData.failed && reminderData.failed > 0 ? "warning" : "success";
       setToastData({
         title: "Recordatorio enviado",
         description: reminderData.message,
@@ -67,7 +68,7 @@ export function PendingTasksView() {
         },
         variant,
       });
-      
+
       setOpen(true);
     }
   }, [isSuccess, reminderData]);
@@ -76,7 +77,7 @@ export function PendingTasksView() {
   React.useEffect(() => {
     if (isMassSuccess && massReminderData) {
       setSendingTaskId(null);
-      
+
       const variant = massReminderData.failed > 0 ? "warning" : "success";
       setToastData({
         title: "Recordatorios masivos enviados",
@@ -89,7 +90,7 @@ export function PendingTasksView() {
         },
         variant,
       });
-      
+
       setOpen(true);
     }
   }, [isMassSuccess, massReminderData]);
@@ -104,17 +105,17 @@ export function PendingTasksView() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-8 w-64 bg-gray-200" />
+          <Skeleton className="h-10 w-32 bg-gray-200" />
         </div>
         {[1, 2, 3].map((i) => (
           <Card key={i}>
             <CardHeader>
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-6 w-3/4 bg-gray-200" />
+              <Skeleton className="h-4 w-1/2 bg-gray-200" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full bg-gray-200" />
             </CardContent>
           </Card>
         ))}
