@@ -2,8 +2,8 @@
 
 import { HelpButton } from "@/components/ui/HelpButton";
 import { LoadingLink } from "@/components/ui/LoadingLink";
-import { useGetRole } from "@/hooks/useGetRole";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
+import { useGetRole } from "@/hooks/useGetRole";
 import {
   BarChart3,
   Home,
@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { RoleBadge } from "./RoleBadge";
 
@@ -24,7 +24,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
 
-  const { data, isLoading } = useGetRole();
+  const { data, isLoading } = useGetRole(session);
   // Close menus when clicking outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
