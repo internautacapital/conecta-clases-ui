@@ -22,6 +22,7 @@ export function PendingTasksView() {
   const { data, isLoading, error, refetch, isFetching } = usePendingTasks();
 
   const [open, setOpen] = React.useState(false);
+  const [sendingTaskId, setSendingTaskId] = React.useState<string | null>(null);
   const eventDateRef = React.useRef(new Date());
   const timerRef = React.useRef(0);
 
@@ -59,6 +60,7 @@ export function PendingTasksView() {
   // Handle success state for sending reminder
   React.useEffect(() => {
     if (isSuccess || isMassSuccess) {
+      setSendingTaskId(null);
       setOpen(true);
       window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
@@ -67,6 +69,12 @@ export function PendingTasksView() {
       }, 100);
     }
   }, [isSuccess, isMassSuccess]);
+
+  React.useEffect(() => {
+    if (isError) {
+      setSendingTaskId(null);
+    }
+  }, [isError]);
 
   if (isLoading && isFetching) {
     return (
@@ -249,6 +257,7 @@ export function PendingTasksView() {
                 <div className="flex justify-end">
                   <Button
                     onClick={() => {
+                      setSendingTaskId(task.taskId);
                       sendReminder({
                         taskId: task.taskId,
                         taskTitle: task.taskTitle,
@@ -257,7 +266,7 @@ export function PendingTasksView() {
                         students: task.pendingStudents,
                       });
                     }}
-                    disabled={isPending}
+                    disabled={isPending && sendingTaskId === task.taskId}
                     size="sm"
                   >
                     <div className="flex items-center">
