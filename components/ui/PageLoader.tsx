@@ -9,7 +9,7 @@ export function PageLoaderContent() {
   if (!loading) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm">
+    <div className="page-loader-mobile">
       <div className="flex flex-col items-center space-y-6 p-8 rounded-2xl bg-white shadow-xl border">
         {/* Logo */}
         <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
