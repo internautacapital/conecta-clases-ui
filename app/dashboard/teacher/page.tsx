@@ -1,5 +1,5 @@
-import { PendingTasksView } from "@/features/teacher/components/PendingTasksView";
 import { MyCourses } from "@/features/teacher/components/Dashboard";
+import { PendingTasksView } from "@/features/teacher/components/PendingTasksView";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";

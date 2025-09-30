@@ -27,10 +27,4 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({ isLoading, roles }) => {
       </Badge>
     );
   }
-
-  return (
-    <div className="flex items-center">
-      <Badge variant="outline">Alumno</Badge>
-    </div>
-  );
 };

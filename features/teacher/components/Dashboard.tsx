@@ -14,10 +14,10 @@ import { useTeacherDashboard } from "@/features/teacher/hooks/useDashboard";
 import { AlertCircle, RefreshCw } from "lucide-react";
 
 export function MyCourses() {
-  const { data, isLoading, error, refetch, isRefetching } =
+  const { data, isLoading, error, refetch, isRefetching, isFetching } =
     useTeacherDashboard();
 
-  if (isLoading) {
+  if (isLoading && isFetching) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -91,32 +91,11 @@ export function MyCourses() {
           Actualizar
         </Button>
       </div>
-
-      {teacherCourses.length === 0 ? (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-10 w-32" />
-          </div>
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-20 w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {teacherCourses.map((course) => (
-            <CourseCard key={course.id} course={course} />
-          ))}
-        </div>
-      )}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {teacherCourses.map((course) => (
+          <CourseCard key={course.id} course={course} />
+        ))}
+      </div>
     </div>
   );
 }

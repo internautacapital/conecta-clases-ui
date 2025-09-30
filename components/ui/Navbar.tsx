@@ -123,7 +123,7 @@ export function Navbar() {
 
         {/* Right side - notifications, help, user menu */}
         <div className="flex items-center space-x-3">
-          <RoleBadge isLoading={isLoading} roles={["teacher"]} />
+          {session && <RoleBadge isLoading={isLoading} roles={data?.roles} />}
           {/* Notifications */}
           {session && (
             <div data-tour="notifications">

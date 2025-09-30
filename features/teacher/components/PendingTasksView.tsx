@@ -4,63 +4,57 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ToastNotification } from "@/components/ui/Toast";
 import { usePendingTasks } from "@/hooks/usePendingTasks";
 import { AlertCircle, Calendar, Mail, RefreshCw, Users } from "lucide-react";
-import { useState } from "react";
+import React from "react";
+import { useSendReminderMutation } from "../hooks/useSendRemiderMutation";
 
 export function PendingTasksView() {
-  const { data, isLoading, error, refetch, isRefetching } = usePendingTasks();
+  const { data, isLoading, error, refetch, isRefetching, isFetching } =
+    usePendingTasks();
 
-  const [sendingEmails, setSendingEmails] = useState<string[]>([]);
+  const [open, setOpen] = React.useState(false);
+  const eventDateRef = React.useRef(new Date());
+  const timerRef = React.useRef(0);
 
-  const handleSendReminder = async (
-    taskId: string,
-    taskTitle: string,
-    courseName: string,
-    dueDate: string | undefined,
-    students: Array<{ email?: string; name: string }>
-  ) => {
-    setSendingEmails((prev) => [...prev, taskId]);
+  React.useEffect(() => {
+    return () => clearTimeout(timerRef.current);
+  }, []);
 
-    try {
-      const response = await fetch("/api/send-reminder", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          taskId,
-          taskTitle,
-          courseName,
-          dueDate,
-          students,
-        }),
-      });
+  const {
+    mutate: sendReminder,
+    isPending,
+    isError,
+    isSuccess,
+  } = useSendReminderMutation();
 
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
+  function oneWeekAway(): Date {
+    const now = new Date();
+    now.setDate(now.getDate() + 7);
+    return now;
+  }
 
-      const result = await response.json();
+  function prettyDate(date: Date) {
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "full",
+      timeStyle: "short",
+    }).format(date);
+  }
 
-      if (result.success) {
-        let message = `✅ ${result.message}`;
-        if (result.skipped > 0) {
-          message += ` (${result.skipped} estudiantes sin email)`;
-        }
-        if (result.failed > 0) {
-          message += `\n⚠️ ${result.failed} correos fallaron`;
-        }
-        console.log("message :>> ", message);
-      } else {
-        throw new Error(result.message || "Error desconocido");
-      }
-    } catch (error) {
-      console.error("Error sending reminders:", error);
-    } finally {
-      setSendingEmails((prev) => prev.filter((id) => id !== taskId));
+  // Handle success state for sending reminder
+  React.useEffect(() => {
+    if (isSuccess) {
+      setOpen(true);
+      window.clearTimeout(timerRef.current);
+      timerRef.current = window.setTimeout(() => {
+        eventDateRef.current = oneWeekAway();
+        setOpen(true);
+      }, 100);
     }
-  };
+  }, [isSuccess]);
 
-  if (isLoading) {
+  if (isLoading && isFetching) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -232,35 +226,35 @@ export function PendingTasksView() {
                 <div className="flex justify-end">
                   <Button
                     onClick={() => {
-                      handleSendReminder(
-                        task.taskId,
-                        task.taskTitle,
-                        task.courseName,
-                        task.dueDate,
-                        task.pendingStudents
-                      );
+                      sendReminder({
+                        taskId: task.taskId,
+                        taskTitle: task.taskTitle,
+                        courseName: task.courseName,
+                        dueDate: task.dueDate,
+                        students: task.pendingStudents,
+                      });
                     }}
-                    disabled={sendingEmails.includes(task.taskId)}
+                    disabled={isPending}
                     size="sm"
                   >
-                    {sendingEmails.includes(task.taskId) ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Enviando...
-                      </>
-                    ) : (
-                      <>
-                        <Mail className="h-4 w-4 mr-2" />
-                        Enviar Recordatorio ({task.pendingStudents.length})
-                      </>
-                    )}
+                    <div className="flex items-center">
+                      <Mail className="h-4 w-4 mr-2" />
+                      Enviar Recordatorio ({task.pendingStudents.length})
+                    </div>
                   </Button>
                 </div>
+                {isError && <div>Error al enviar recordatorio</div>}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+      <ToastNotification
+        open={open}
+        setOpen={setOpen}
+        eventDate={eventDateRef.current}
+        prettyDate={prettyDate}
+      />
     </div>
   );
 }
