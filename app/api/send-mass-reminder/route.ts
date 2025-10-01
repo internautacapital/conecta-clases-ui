@@ -1,12 +1,12 @@
-import { authOptions } from "@/lib/auth";
-import { createErrorResponse } from "@/lib/errorMiddleware";
+import { authOptions } from '@/lib/auth';
+import { createErrorResponse } from '@/lib/errorMiddleware';
 import {
   sendBatchGmailMessages,
   setGmailAccessToken,
   type EmailMessage,
-} from "@/lib/gmail";
-import { getServerSession } from "next-auth";
-import { NextRequest, NextResponse } from "next/server";
+} from '@/lib/gmail';
+import { getServerSession } from 'next-auth';
+import { NextRequest, NextResponse } from 'next/server';
 
 export type MassReminderRequest = {
   tasks: Array<{
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body: MassReminderRequest = await request.json();
@@ -34,16 +34,13 @@ export async function POST(request: NextRequest) {
     const accessToken = session.accessToken;
     if (!accessToken) {
       return NextResponse.json(
-        { error: "Missing Google access token in session" },
+        { error: 'Missing Google access token in session' },
         { status: 400 }
       );
     }
 
     if (!tasks || tasks.length === 0) {
-      return NextResponse.json(
-        { error: "No tasks provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No tasks provided' }, { status: 400 });
     }
 
     setGmailAccessToken(accessToken);
@@ -63,9 +60,7 @@ export async function POST(request: NextRequest) {
     >();
 
     for (const task of tasks) {
-      const studentsWithEmail = task.students.filter(
-        (student) => student.email
-      );
+      const studentsWithEmail = task.students.filter(student => student.email);
 
       for (const student of studentsWithEmail) {
         const email = student.email!;
@@ -86,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     if (studentTaskMap.size === 0) {
       return NextResponse.json(
-        { error: "No students with valid email addresses found" },
+        { error: 'No students with valid email addresses found' },
         { status: 400 }
       );
     }
@@ -94,16 +89,16 @@ export async function POST(request: NextRequest) {
     // Create personalized emails for each student
     const emailMessages: EmailMessage[] = Array.from(
       studentTaskMap.values()
-    ).map((studentData) => {
+    ).map(studentData => {
       const tasksList = studentData.tasks
         .map((task, index) => {
           return `${index + 1}. ${task.taskTitle} - ${task.courseName}${
             task.dueDate
-              ? `\n   Fecha de entrega: ${new Date(task.dueDate).toLocaleDateString("es-ES")}`
-              : ""
+              ? `\n   Fecha de entrega: ${new Date(task.dueDate).toLocaleDateString('es-ES')}`
+              : ''
           }`;
         })
-        .join("\n\n");
+        .join('\n\n');
 
       const emailSubject =
         studentData.tasks.length === 1
@@ -112,14 +107,14 @@ export async function POST(request: NextRequest) {
 
       const emailBody = `Hola ${studentData.name},
 
-Este es un recordatorio de que tienes ${studentData.tasks.length === 1 ? "una tarea pendiente" : `${studentData.tasks.length} tareas pendientes`}:
+Este es un recordatorio de que tienes ${studentData.tasks.length === 1 ? 'una tarea pendiente' : `${studentData.tasks.length} tareas pendientes`}:
 
 ${tasksList}
 
 Por favor, completa y entrega tus tareas lo antes posible.
 
 Saludos,
-${session.user?.name || "Tu profesor"}
+${session.user?.name || 'Tu profesor'}
 
 ---
 Este mensaje fue enviado automáticamente desde Conecta Clases.`;
@@ -132,7 +127,7 @@ Este mensaje fue enviado automáticamente desde Conecta Clases.`;
       };
     });
 
-    console.log("Sending mass reminder emails:", {
+    console.log('Sending mass reminder emails:', {
       totalTasks: tasks.length,
       totalStudents: studentTaskMap.size,
       totalEmails: emailMessages.length,
@@ -144,12 +139,12 @@ Este mensaje fue enviado automáticamente desde Conecta Clases.`;
     const results = await sendBatchGmailMessages(emailMessages, 500);
 
     if (results.failed > 0) {
-      console.error("Some emails failed to send:", results.errors);
+      console.error('Some emails failed to send:', results.errors);
     }
 
     // Count total students across all tasks (including duplicates)
     const totalStudentsInTasks = tasks.reduce(
-      (sum, task) => sum + task.students.filter((s) => s.email).length,
+      (sum, task) => sum + task.students.filter(s => s.email).length,
       0
     );
     const skipped = totalStudentsInTasks - studentTaskMap.size;
@@ -167,7 +162,7 @@ Este mensaje fue enviado automáticamente desde Conecta Clases.`;
       errors: results.errors,
     });
   } catch (error: unknown) {
-    console.error("/api/send-mass-reminder error:", error);
+    console.error('/api/send-mass-reminder error:', error);
     return createErrorResponse(error as Error, 500);
   }
 }

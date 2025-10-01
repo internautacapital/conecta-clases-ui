@@ -4,7 +4,7 @@ import {
   getCurrentUserProfile,
   getStudentSubmissions,
   type StudentSubmission,
-} from "@/lib/google";
+} from '@/lib/google';
 
 export type Assignment = {
   id: string;
@@ -12,7 +12,7 @@ export type Assignment = {
   courseId: string;
   courseName: string;
   dueDate?: string;
-  status: "pending" | "submitted" | "late";
+  status: 'pending' | 'submitted' | 'late';
   submissionState?: string;
   alternateLink?: string;
 };
@@ -51,7 +51,7 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
     // Get all courses for the user
     const courses = await getCourses();
 
-    const courseProgressPromises = courses.map(async (course) => {
+    const courseProgressPromises = courses.map(async course => {
       if (!course.id) return null;
 
       try {
@@ -62,7 +62,7 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
         if (totalAssignments === 0) {
           return {
             courseId: course.id,
-            courseName: course.name || "Sin nombre",
+            courseName: course.name || 'Sin nombre',
             progressPercent: 100,
             totalAssignments: 0,
             completedAssignments: 0,
@@ -80,14 +80,14 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
           try {
             const submissions = await getStudentSubmissions(course.id, work.id);
             const userSubmission = submissions.find(
-              (sub) => sub.userId === currentUserId
+              sub => sub.userId === currentUserId
             );
 
             if (userSubmission) {
               // Check if assignment is completed based on state
               if (
-                userSubmission.state === "TURNED_IN" ||
-                userSubmission.state === "RETURNED"
+                userSubmission.state === 'TURNED_IN' ||
+                userSubmission.state === 'RETURNED'
               ) {
                 completedCount++;
               }
@@ -119,7 +119,7 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
 
         return {
           courseId: course.id,
-          courseName: course.name || "Sin nombre",
+          courseName: course.name || 'Sin nombre',
           progressPercent,
           totalAssignments,
           completedAssignments: completedCount,
@@ -130,7 +130,7 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
         console.warn(`Failed to get progress for course ${course.id}:`, error);
         return {
           courseId: course.id!,
-          courseName: course.name || "Sin nombre",
+          courseName: course.name || 'Sin nombre',
           progressPercent: 0,
           totalAssignments: 0,
           completedAssignments: 0,
@@ -172,27 +172,27 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
 
           const submissions = await getStudentSubmissions(course.id, work.id);
           const userSubmission = submissions.find(
-            (sub) => sub.userId === currentUserId
+            sub => sub.userId === currentUserId
           );
 
           // Determine assignment status based on submission state
           const getAssignmentStatus = (
             submission?: StudentSubmission
-          ): "pending" | "submitted" | "late" => {
-            if (!submission) return "pending";
+          ): 'pending' | 'submitted' | 'late' => {
+            if (!submission) return 'pending';
             switch (submission.state) {
-              case "TURNED_IN":
-              case "RETURNED":
-                return "submitted";
-              case "NEW":
-              case "CREATED":
-              case "SUBMISSION_STATE_UNSPECIFIED":
-                return submission.late ? "late" : "pending";
-              case "RECLAIMED_BY_STUDENT":
-                return "pending"; // Student reclaimed, so it's pending again
+              case 'TURNED_IN':
+              case 'RETURNED':
+                return 'submitted';
+              case 'NEW':
+              case 'CREATED':
+              case 'SUBMISSION_STATE_UNSPECIFIED':
+                return submission.late ? 'late' : 'pending';
+              case 'RECLAIMED_BY_STUDENT':
+                return 'pending'; // Student reclaimed, so it's pending again
               default:
-                console.warn("Unknown submission state:", submission.state);
-                return "pending";
+                console.warn('Unknown submission state:', submission.state);
+                return 'pending';
             }
           };
 
@@ -201,17 +201,17 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
           // Include all assignments (both pending and completed) to show full status
           upcomingAssignments.push({
             id: work.id,
-            title: work.title || "Tarea sin título",
+            title: work.title || 'Tarea sin título',
             courseId: course.id,
-            courseName: course.name || "Sin nombre",
+            courseName: course.name || 'Sin nombre',
             dueDate: work.dueDate
               ? `${work.dueDate.year}-${String(work.dueDate.month).padStart(
                   2,
-                  "0"
-                )}-${String(work.dueDate.day).padStart(2, "0")}`
+                  '0'
+                )}-${String(work.dueDate.day).padStart(2, '0')}`
               : undefined,
             status: assignmentStatus,
-            submissionState: userSubmission?.state || "NEW",
+            submissionState: userSubmission?.state || 'NEW',
             alternateLink: work.alternateLink || undefined,
           });
         }
@@ -233,12 +233,12 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
 
     // Generate some recent grades (simplified)
     const recentGrades = courseProgress
-      .filter((cp) => cp.averageGrade !== undefined)
+      .filter(cp => cp.averageGrade !== undefined)
       .slice(0, 5)
-      .map((cp) => ({
+      .map(cp => ({
         courseName: cp.courseName,
         grade: cp.averageGrade!,
-        assignmentTitle: "Promedio del curso",
+        assignmentTitle: 'Promedio del curso',
         date: new Date().toISOString(),
       }));
 
@@ -252,7 +252,7 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
       completedAssignments: totalCompleted,
     };
   } catch (error) {
-    console.error("Failed to get student dashboard data:", error);
+    console.error('Failed to get student dashboard data:', error);
 
     // Return empty data structure on error
     return {

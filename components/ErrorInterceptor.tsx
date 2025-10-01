@@ -1,14 +1,14 @@
-"use client"
+'use client';
 
-import { useErrorInterceptor } from "@/hooks/useErrorInterceptor"
+import { useErrorInterceptor } from '@/hooks/useErrorInterceptor';
 
 /**
  * Componente que inicializa el interceptor de errores
  * Debe ser incluido en el layout principal
  */
 export function ErrorInterceptor() {
-  useErrorInterceptor()
-  
+  useErrorInterceptor();
+
   // Este componente no renderiza nada
-  return null
+  return null;
 }

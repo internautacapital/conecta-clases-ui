@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react';
 
 /**
  * Hook that returns true only after the component has hydrated on the client.
@@ -8,13 +8,13 @@ import { useEffect, useState } from "react"
  * differs between server and client (like dates, random values, etc.)
  */
 export function useClientOnly() {
-  const [isClient, setIsClient] = useState(false)
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
-  return isClient
+  return isClient;
 }
 
 /**
@@ -22,6 +22,6 @@ export function useClientOnly() {
  * Returns null during SSR and the actual date after hydration.
  */
 export function useSafeDate() {
-  const isClient = useClientOnly()
-  return isClient ? new Date() : null
+  const isClient = useClientOnly();
+  return isClient ? new Date() : null;
 }

@@ -1,5 +1,5 @@
-import * as React from "react";
-import * as Toast from "@radix-ui/react-toast";
+import * as React from 'react';
+import * as Toast from '@radix-ui/react-toast';
 
 type EmailStats = {
   sent?: number;
@@ -14,22 +14,25 @@ type ToastProps = {
   title?: string;
   description?: string;
   emailStats?: EmailStats;
-  variant?: "success" | "warning" | "error";
+  variant?: 'success' | 'warning' | 'error';
 };
 
 export const ToastNotification: React.FC<ToastProps> = ({
   open,
   setOpen,
-  title = "Correos enviados",
+  title = 'Correos enviados',
   description,
   emailStats,
-  variant = "success",
+  variant = 'success',
 }) => {
-  const bgColor = 
-    variant === "success" ? "bg-green-600" :
-    variant === "warning" ? "bg-yellow-600" :
-    variant === "error" ? "bg-red-600" :
-    "bg-black";
+  const bgColor =
+    variant === 'success'
+      ? 'bg-green-600'
+      : variant === 'warning'
+        ? 'bg-yellow-600'
+        : variant === 'error'
+          ? 'bg-red-600'
+          : 'bg-black';
 
   return (
     <>
@@ -48,17 +51,17 @@ export const ToastNotification: React.FC<ToastProps> = ({
         onOpenChange={setOpen}
         duration={5000}
       >
-        <Toast.Title className="font-medium text-[15px] mb-[5px]">
+        <Toast.Title className='font-medium text-[15px] mb-[5px]'>
           {title}
         </Toast.Title>
         {description && (
-          <Toast.Description className="text-[13px] leading-[1.3] mb-2 opacity-90">
+          <Toast.Description className='text-[13px] leading-[1.3] mb-2 opacity-90'>
             {description}
           </Toast.Description>
         )}
         {emailStats && (
-          <Toast.Description className="text-[12px] leading-[1.4] opacity-90">
-            <div className="space-y-1">
+          <Toast.Description className='text-[12px] leading-[1.4] opacity-90'>
+            <div className='space-y-1'>
               {emailStats.sent !== undefined && emailStats.sent > 0 && (
                 <div>✅ Enviados: {emailStats.sent}</div>
               )}
@@ -68,20 +71,21 @@ export const ToastNotification: React.FC<ToastProps> = ({
               {emailStats.skipped !== undefined && emailStats.skipped > 0 && (
                 <div>⏭️ Omitidos: {emailStats.skipped}</div>
               )}
-              {emailStats.totalTasks !== undefined && emailStats.totalTasks > 0 && (
-                <div>📋 Tareas: {emailStats.totalTasks}</div>
-              )}
+              {emailStats.totalTasks !== undefined &&
+                emailStats.totalTasks > 0 && (
+                  <div>📋 Tareas: {emailStats.totalTasks}</div>
+                )}
             </div>
           </Toast.Description>
         )}
       </Toast.Root>
       <Toast.Viewport
-        className="fixed bottom-0 right-0 
+        className='fixed bottom-0 right-0 
                 flex flex-col 
                 p-[25px] gap-[10px] 
                 w-[390px] max-w-[100vw] 
                 m-0 list-none 
-                z-[2147483647] outline-none"
+                z-[2147483647] outline-none'
       />
     </>
   );

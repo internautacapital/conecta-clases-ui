@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from '@tanstack/react-query';
 
 type Student = { email?: string; name: string };
 
@@ -26,9 +26,9 @@ const sendReminder = async ({
   dueDate,
   students,
 }: SendReminderParams): Promise<SendReminderResponse> => {
-  const response = await fetch("/api/send-reminder", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+  const response = await fetch('/api/send-reminder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ taskId, taskTitle, courseName, dueDate, students }),
   });
 
@@ -48,10 +48,10 @@ export const useSendReminderMutation = () => {
         logMessage += ` (${result.skipped} estudiantes sin email)`;
       if (result.failed && result.failed > 0)
         logMessage += `\n⚠️ ${result.failed} correos fallaron`;
-      console.log("message :>> ", logMessage);
+      console.log('message :>> ', logMessage);
       return result;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       return data;
     },
   });

@@ -1,13 +1,13 @@
-import { withAuth } from "next-auth/middleware";
+import { withAuth } from 'next-auth/middleware';
 
 export default withAuth(function middleware() {}, {
   callbacks: {
     authorized: ({ token, req }) => {
       const { pathname } = req.nextUrl;
-      if (pathname.startsWith("/dashboard")) {
+      if (pathname.startsWith('/dashboard')) {
         return !!token;
       }
-      if (pathname.startsWith("/api")) {
+      if (pathname.startsWith('/api')) {
         return !!token;
       }
       return true;
@@ -16,5 +16,5 @@ export default withAuth(function middleware() {}, {
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/:path*"],
+  matcher: ['/dashboard/:path*', '/api/:path*'],
 };

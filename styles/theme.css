@@ -1,11 +1,11 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --color-primary: 37 99 235; /* #2563eb */
   --color-primary-foreground: 255 255 255;
   --color-secondary: 147 51 234; /* #9333ea */
   --color-secondary-foreground: 255 255 255;
-  
+
   /* Light theme */
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
@@ -82,7 +82,11 @@ body {
 .navbar-brand {
   font-size: 1.25rem;
   font-weight: 700;
-  background: linear-gradient(to right, rgb(var(--color-primary)), rgb(var(--color-secondary)));
+  background: linear-gradient(
+    to right,
+    rgb(var(--color-primary)),
+    rgb(var(--color-secondary))
+  );
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;

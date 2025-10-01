@@ -1,5 +1,5 @@
-import { authOptions } from "@/lib/auth";
-import { createErrorResponse } from "@/lib/errorMiddleware";
+import { authOptions } from '@/lib/auth';
+import { createErrorResponse } from '@/lib/errorMiddleware';
 import {
   getCourses,
   getCourseWork,
@@ -7,9 +7,9 @@ import {
   getStudentSubmissions,
   getUserProfile,
   setAccessToken,
-} from "@/lib/google";
-import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+} from '@/lib/google';
+import { getServerSession } from 'next-auth';
+import { NextResponse } from 'next/server';
 
 export type PendingTask = {
   courseId: string;
@@ -30,13 +30,13 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const accessToken = session.accessToken;
     if (!accessToken) {
       return NextResponse.json(
-        { error: "Missing Google access token in session" },
+        { error: 'Missing Google access token in session' },
         { status: 400 }
       );
     }
@@ -46,7 +46,7 @@ export async function GET() {
     // Get all courses where user is a teacher
     const courses = await getCourses();
     const teacherCourses = courses.filter(
-      (course) => course.teacherFolder || course.ownerId === session.user?.email
+      course => course.teacherFolder || course.ownerId === session.user?.email
     );
 
     const pendingTasks: PendingTask[] = [];
@@ -71,9 +71,9 @@ export async function GET() {
             const submissions = await getStudentSubmissions(course.id, work.id);
             // Find students with pending submissions and get their details
             const pendingStudentsPromises = students
-              .filter((student) => {
+              .filter(student => {
                 const submission = submissions.find(
-                  (sub) => sub.userId === student.userId
+                  sub => sub.userId === student.userId
                 );
 
                 // If no submission found, it's pending
@@ -81,15 +81,15 @@ export async function GET() {
 
                 // Check if submission state indicates it's pending
                 const pendingStates = [
-                  "NEW",
-                  "CREATED",
-                  "RECLAIMED_BY_STUDENT",
+                  'NEW',
+                  'CREATED',
+                  'RECLAIMED_BY_STUDENT',
                 ];
-                return pendingStates.includes(submission.state || "NEW");
+                return pendingStates.includes(submission.state || 'NEW');
               })
-              .map(async (student) => {
+              .map(async student => {
                 const submission = submissions.find(
-                  (sub) => sub.userId === student.userId
+                  sub => sub.userId === student.userId
                 );
 
                 const userProfile = await getUserProfile(student.userId);
@@ -97,8 +97,8 @@ export async function GET() {
                 return {
                   userId: student.userId,
                   name: student.name,
-                  email: userProfile?.emailAddress ?? "",
-                  submissionState: submission?.state || "NOT_SUBMITTED",
+                  email: userProfile?.emailAddress ?? '',
+                  submissionState: submission?.state || 'NOT_SUBMITTED',
                 };
               });
 
@@ -109,15 +109,15 @@ export async function GET() {
             if (pendingStudents.length > 0) {
               pendingTasks.push({
                 courseId: course.id,
-                courseName: course.name || "Curso sin nombre",
+                courseName: course.name || 'Curso sin nombre',
                 taskId: work.id,
-                taskTitle: work.title || "Tarea sin título",
+                taskTitle: work.title || 'Tarea sin título',
                 taskDescription: work.description || undefined,
                 dueDate: work.dueDate
                   ? `${work.dueDate.year}-${String(work.dueDate.month).padStart(
                       2,
-                      "0"
-                    )}-${String(work.dueDate.day).padStart(2, "0")}`
+                      '0'
+                    )}-${String(work.dueDate.day).padStart(2, '0')}`
                   : undefined,
                 pendingStudents,
               });
@@ -146,7 +146,7 @@ export async function GET() {
 
     return NextResponse.json({ pendingTasks });
   } catch (error: unknown) {
-    console.error("/api/pending-tasks error:", error);
+    console.error('/api/pending-tasks error:', error);
     return createErrorResponse(error as Error, 500, true);
   }
 }

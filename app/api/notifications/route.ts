@@ -1,8 +1,8 @@
-import { authOptions } from "@/lib/auth";
-import { createErrorResponse } from "@/lib/errorMiddleware";
-import { getAnnouncements, getCourses, setAccessToken } from "@/lib/google";
-import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { authOptions } from '@/lib/auth';
+import { createErrorResponse } from '@/lib/errorMiddleware';
+import { getAnnouncements, getCourses, setAccessToken } from '@/lib/google';
+import { getServerSession } from 'next-auth';
+import { NextResponse } from 'next/server';
 
 export type NotificationItem = {
   id: string | undefined;
@@ -19,13 +19,13 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const accessToken = session.accessToken;
     if (!accessToken) {
       return NextResponse.json(
-        { error: "Missing Google access token in session" },
+        { error: 'Missing Google access token in session' },
         { status: 400 }
       );
     }
@@ -35,14 +35,14 @@ export async function GET() {
     const courses = await getCourses();
 
     const all = await Promise.all(
-      (courses || []).map(async (c) => {
+      (courses || []).map(async c => {
         if (!c.id) return [];
         const anns = await getAnnouncements(c.id);
-        return anns.map((a) => ({
+        return anns.map(a => ({
           id: a.id,
           courseId: c.id!,
-          courseName: c.name || "Curso",
-          text: a.text || "",
+          courseName: c.name || 'Curso',
+          text: a.text || '',
           alternateLink: a.alternateLink || null,
           state: a.state || null,
           creationTime: a.creationTime || null,
@@ -60,7 +60,7 @@ export async function GET() {
 
     return NextResponse.json({ announcements: flat });
   } catch (error: unknown) {
-    console.error("/api/notifications error:", error);
+    console.error('/api/notifications error:', error);
     // Si es un error 500, forzar logout
     return createErrorResponse(error as Error, 500, true);
   }

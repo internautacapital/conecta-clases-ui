@@ -1,6 +1,6 @@
-import { Account, NextAuthOptions, Session } from "next-auth";
-import { JWT } from "next-auth/jwt";
-import GoogleProvider from "next-auth/providers/google";
+import { Account, NextAuthOptions, Session } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
+import GoogleProvider from 'next-auth/providers/google';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -10,19 +10,19 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scope: [
-            "openid",
-            "email",
-            "profile",
-            "https://www.googleapis.com/auth/classroom.courses.readonly",
-            "https://www.googleapis.com/auth/classroom.coursework.me.readonly",
-            "https://www.googleapis.com/auth/classroom.student-submissions.me.readonly",
-            "https://www.googleapis.com/auth/classroom.coursework.students.readonly",
-            "https://www.googleapis.com/auth/classroom.rosters.readonly",
-            "https://www.googleapis.com/auth/classroom.profile.emails",
-            "https://www.googleapis.com/auth/classroom.profile.photos",
-            "https://www.googleapis.com/auth/classroom.announcements.readonly",
-            "https://www.googleapis.com/auth/gmail.send",
-          ].join(" "),
+            'openid',
+            'email',
+            'profile',
+            'https://www.googleapis.com/auth/classroom.courses.readonly',
+            'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+            'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly',
+            'https://www.googleapis.com/auth/classroom.coursework.students.readonly',
+            'https://www.googleapis.com/auth/classroom.rosters.readonly',
+            'https://www.googleapis.com/auth/classroom.profile.emails',
+            'https://www.googleapis.com/auth/classroom.profile.photos',
+            'https://www.googleapis.com/auth/classroom.announcements.readonly',
+            'https://www.googleapis.com/auth/gmail.send',
+          ].join(' '),
         },
       },
     }),
@@ -57,35 +57,35 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.accessToken = token.accessToken as string;
         session.user.email = token.email as string;
-        session.user.role = token.role as "alumno" | "profesor" | "coordinador";
+        session.user.role = token.role as 'alumno' | 'profesor' | 'coordinador';
         session.user.id = token.sub as string;
       }
       return session;
     },
   },
   pages: {
-    signIn: "/login",
+    signIn: '/login',
   },
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
   },
 };
 
 // Function to determine user role based on email
 function determineUserRole(
   email: string
-): "alumno" | "profesor" | "coordinador" {
+): 'alumno' | 'profesor' | 'coordinador' {
   // This is a simple example - you should implement your own logic
   // You might want to check against a database or use specific email patterns
 
   // Example logic:
-  if (email.includes("profesor") || email.includes("teacher")) {
-    return "profesor";
+  if (email.includes('profesor') || email.includes('teacher')) {
+    return 'profesor';
   }
-  if (email.includes("coordinador") || email.includes("admin")) {
-    return "coordinador";
+  if (email.includes('coordinador') || email.includes('admin')) {
+    return 'coordinador';
   }
 
   // Default to student
-  return "alumno";
+  return 'alumno';
 }
