@@ -1,5 +1,5 @@
-import type { classroom_v1 } from "googleapis";
-import { google } from "googleapis";
+import type { classroom_v1 } from 'googleapis';
+import { google } from 'googleapis';
 
 const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/callback/google`;
 
@@ -48,12 +48,12 @@ export type StudentSubmission = {
   courseId: string;
   courseWorkId: string;
   state:
-    | "SUBMISSION_STATE_UNSPECIFIED"
-    | "NEW"
-    | "CREATED"
-    | "TURNED_IN"
-    | "RETURNED"
-    | "RECLAIMED_BY_STUDENT"
+    | 'SUBMISSION_STATE_UNSPECIFIED'
+    | 'NEW'
+    | 'CREATED'
+    | 'TURNED_IN'
+    | 'RETURNED'
+    | 'RECLAIMED_BY_STUDENT'
     | string;
   assignedGrade?: number | null;
   draftGrade?: number | null;
@@ -97,13 +97,13 @@ export async function getAnnouncements(
 function requireAuth() {
   if (!currentAccessToken) {
     throw new Error(
-      "Google OAuth access token is not set. Call setAccessToken(token) first."
+      'Google OAuth access token is not set. Call setAccessToken(token) first.'
     );
   }
 }
 
 function getClassroom(): classroom_v1.Classroom {
-  return google.classroom({ version: "v1", auth: oauth2Client });
+  return google.classroom({ version: 'v1', auth: oauth2Client });
 }
 
 // Helper function to safely convert Google API string values that can be null to undefined
@@ -128,7 +128,7 @@ export async function getCourses() {
 
   // List active courses for the authenticated user
   const res = await classroom.courses.list({
-    courseStates: ["ACTIVE"],
+    courseStates: ['ACTIVE'],
     pageSize: 100,
   });
   return res.data.courses ?? [];
@@ -161,13 +161,13 @@ export async function getStudentSubmissions(
 
   const submissions = res.data.studentSubmissions ?? [];
 
-  return submissions.map((sub) => {
+  return submissions.map(sub => {
     // Ensure state is properly set, default to 'NEW' if undefined
-    const submissionState = sub.state || "NEW";
+    const submissionState = sub.state || 'NEW';
 
     // Process submission history
     const submissionHistory =
-      sub.submissionHistory?.map((history) => ({
+      sub.submissionHistory?.map(history => ({
         stateHistory: history.stateHistory
           ? {
               state: convertNullToUndefined(history.stateHistory.state),
@@ -187,12 +187,12 @@ export async function getStudentSubmissions(
       courseId,
       courseWorkId: courseworkId,
       state: submissionState as
-        | "SUBMISSION_STATE_UNSPECIFIED"
-        | "NEW"
-        | "CREATED"
-        | "TURNED_IN"
-        | "RETURNED"
-        | "RECLAIMED_BY_STUDENT"
+        | 'SUBMISSION_STATE_UNSPECIFIED'
+        | 'NEW'
+        | 'CREATED'
+        | 'TURNED_IN'
+        | 'RETURNED'
+        | 'RECLAIMED_BY_STUDENT'
         | string,
       assignedGrade: sub.assignedGrade ?? undefined,
       draftGrade: sub.draftGrade ?? undefined,
@@ -211,7 +211,7 @@ export async function getCurrentUserProfile() {
 
   try {
     const res = await classroom.userProfiles.get({
-      userId: "me",
+      userId: 'me',
     });
 
     return {
@@ -220,7 +220,7 @@ export async function getCurrentUserProfile() {
       email: convertNullToUndefined(res.data.emailAddress),
     };
   } catch (error) {
-    console.error("Failed to get current user profile:", error);
+    console.error('Failed to get current user profile:', error);
     throw error;
   }
 }
@@ -242,7 +242,7 @@ export async function getStudents(courseId: string) {
       const name =
         s.profile?.name?.fullName ||
         s.profile?.name?.givenName ||
-        "Desconocido";
+        'Desconocido';
       const email = convertNullToUndefined(s.profile?.emailAddress);
       if (userId) {
         students.push({ userId, name, email });
@@ -270,7 +270,7 @@ export async function getTeachers(courseId: string) {
       const name =
         t.profile?.name?.fullName ||
         t.profile?.name?.givenName ||
-        "Desconocido";
+        'Desconocido';
       const email = convertNullToUndefined(t.profile?.emailAddress);
       if (userId) {
         teachers.push({ userId, name, email });
@@ -284,23 +284,23 @@ export async function getTeachers(courseId: string) {
 export async function getUserRole(
   courseId: string,
   userEmail: string
-): Promise<"teacher" | "student" | null> {
+): Promise<'teacher' | 'student' | null> {
   requireAuth();
 
   try {
     // Check if user is a teacher
     const teachers = await getTeachers(courseId);
-    const isTeacher = teachers.some((t) => t.userId === userEmail);
-    if (isTeacher) return "teacher";
+    const isTeacher = teachers.some(t => t.userId === userEmail);
+    if (isTeacher) return 'teacher';
 
     // Check if user is a student
     const students = await getStudents(courseId);
-    const isStudent = students.some((s) => s.userId === userEmail);
-    if (isStudent) return "student";
+    const isStudent = students.some(s => s.userId === userEmail);
+    if (isStudent) return 'student';
 
     return null;
   } catch (error) {
-    console.error("Error getting user role:", error);
+    console.error('Error getting user role:', error);
     return null;
   }
 }
@@ -326,7 +326,7 @@ export type CourseWithRole = {
   };
   guardiansEnabled?: boolean;
   calendarId?: string;
-  role: "teacher" | "student";
+  role: 'teacher' | 'student';
 };
 
 export async function getCoursesWithRoles(
@@ -341,7 +341,7 @@ export async function getCoursesWithRoles(
     if (role) {
       coursesWithRoles.push({
         id: course.id,
-        name: course.name || "Curso sin nombre",
+        name: course.name || 'Curso sin nombre',
         section: convertNullToUndefined(course.section),
         description: convertNullToUndefined(course.description),
         room: convertNullToUndefined(course.room),

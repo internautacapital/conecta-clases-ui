@@ -87,18 +87,22 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ## Funcionalidades Implementadas
 
 ### ✅ Autenticación con Google
+
 - Los usuarios se autentican usando su cuenta de Google
 - Compatible con cuentas de Google Classroom
 
 ### ✅ Gestión de Roles
+
 - **Alumno**: Rol por defecto
 - **Profesor**: Para emails que contengan "profesor" o "teacher"
 
 ### ✅ Protección de Rutas
+
 - Las rutas `/dashboard/*` están protegidas
 - Los usuarios no autenticados son redirigidos a `/login`
 
 ### ✅ Sesión Persistente
+
 - La sesión incluye email y rol del usuario
 - Los datos se mantienen entre recargas de página
 
@@ -130,10 +134,10 @@ Para personalizar la lógica de asignación de roles, edita la función `determi
 ```typescript
 function determineUserRole(email: string): 'alumno' | 'profesor' {
   if (email.includes('profesor') || email.includes('teacher')) {
-    return 'profesor'
+    return 'profesor';
   }
-  
-  return 'alumno' // Rol por defecto
+
+  return 'alumno'; // Rol por defecto
 }
 ```
 
@@ -148,6 +152,7 @@ npm install googleapis recharts
 ```
 
 ### Scopes requeridos
+
 Los scopes necesarios ya están configurados en `lib/auth.ts`:
 
 - `https://www.googleapis.com/auth/classroom.courses.readonly`
@@ -155,11 +160,13 @@ Los scopes necesarios ya están configurados en `lib/auth.ts`:
 - `https://www.googleapis.com/auth/classroom.student-submissions.me.readonly`
 
 ### Variables de entorno usadas
+
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 - `NEXTAUTH_URL`
 
 ### Endpoints disponibles
+
 - `GET /api/classroom`: retorna los cursos del usuario autenticado (requiere sesión iniciada y permisos aceptados en el consentimiento de Google).
 - `GET /api/notifications`: retorna anuncios de todos los cursos del usuario.
 - `GET /api/metrics?courseId=ID`: retorna métricas semanales de un curso específico.
@@ -172,6 +179,7 @@ curl -X GET http://localhost:3000/api/metrics?courseId=123456
 ```
 
 ### Páginas disponibles
+
 - `/dashboard/progress`: tabla de progreso de estudiantes por curso
 - `/dashboard/metrics`: gráficos de métricas semanales (asistencia, entregas, participación)
 
@@ -181,9 +189,10 @@ curl -X GET http://localhost:3000/api/metrics?courseId=123456
 2. **Roles Dinámicos**: Implementar un sistema de gestión de roles más flexible (coordinador)
 3. **UI Mejorada**: Mejorar la interfaz de usuario del login y dashboard
 
-
 ### Error: "Invalid client_id"
+
 Verifica que el `GOOGLE_CLIENT_ID` en `.env.local` sea correcto y que las URLs autorizadas estén configuradas correctamente en Google Cloud Console.
 
 ### Error: "NEXTAUTH_SECRET missing"
+
 Asegúrate de tener `NEXTAUTH_SECRET` configurado en tu archivo `.env.local`.

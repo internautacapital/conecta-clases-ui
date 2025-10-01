@@ -1,0 +1,42 @@
+name: Notify Discord on Vercel deployments
+
+on:
+  deployment_status:
+
+jobs:
+  notify:
+    if: >
+      github.event.deployment_status.state == 'success' ||
+      github.event.deployment_status.state == 'failure' ||
+      github.event.deployment_status.state == 'inactive'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          STATE: ${{ github.event.deployment_status.state }}
+          ENVIRONMENT: ${{ github.event.deployment.environment }}
+          TARGET_URL: ${{ github.event.deployment_status.target_url }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          UPDATED_AT: ${{ github.event.deployment_status.updated_at }}
+        run: |
+          STATUS_EMOJI=""
+          if [ "$STATE" = "success" ]; then STATUS_EMOJI="✅"; fi
+          if [ "$STATE" = "failure" ]; then STATUS_EMOJI="❌"; fi
+          if [ "$STATE" = "inactive" ]; then STATUS_EMOJI="⚪"; fi
+
+          jq -nc --arg se "$STATUS_EMOJI" --arg st "$STATE" --arg env "$ENVIRONMENT" \
+                --arg url "$TARGET_URL" --arg repo "$REPO" --arg sha "$SHA" \
+                --arg actor "$ACTOR" --arg ts "$UPDATED_AT" '
+          {
+            embeds: [{
+              title: ("\($se) Vercel deployment " + $st + " • " + $repo),
+              url: $url,
+              description: ("**Environment:** " + $env  + "\n**Commit:** " + $sha + "\n**By:** " + $actor),
+              timestamp: $ts
+            }]
+          }' > body.json
+
+          curl -sS -H "Content-Type: application/json" -d @body.json "$DISCORD_WEBHOOK"

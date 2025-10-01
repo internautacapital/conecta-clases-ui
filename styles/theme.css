@@ -1,11 +1,11 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --color-primary: 37 99 235; /* #2563eb */
   --color-primary-foreground: 255 255 255;
   --color-secondary: 147 51 234; /* #9333ea */
   --color-secondary-foreground: 255 255 255;
-  
+
   /* Light theme */
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
@@ -82,7 +82,11 @@ body {
 .navbar-brand {
   font-size: 1.25rem;
   font-weight: 700;
-  background: linear-gradient(to right, rgb(var(--color-primary)), rgb(var(--color-secondary)));
+  background: linear-gradient(
+    to right,
+    rgb(var(--color-primary)),
+    rgb(var(--color-secondary))
+  );
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -104,4 +108,31 @@ body {
 .nav-link.active {
   color: rgb(var(--color-primary));
   background-color: rgb(var(--color-primary) / 0.1);
+}
+
+/* PageLoader mobile fix */
+.page-loader-mobile {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 50 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: white !important;
+  /* Prevent any scrollbar or layout shifts */
+  overflow: hidden !important;
+  /* Force hardware acceleration */
+  transform: translate3d(0, 0, 0) !important;
+  -webkit-transform: translate3d(0, 0, 0) !important;
+}
+
+@media (min-width: 768px) {
+  .page-loader-mobile {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
 }

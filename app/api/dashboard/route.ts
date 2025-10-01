@@ -1,15 +1,15 @@
-import { authOptions } from "@/lib/auth";
-import { createErrorResponse } from "@/lib/errorMiddleware";
+import { authOptions } from '@/lib/auth';
+import { createErrorResponse } from '@/lib/errorMiddleware';
 import {
   getCoursesWithRoles,
   getCourseWork,
-  getStudentSubmissions,
   getStudents,
+  getStudentSubmissions,
   setAccessToken,
-} from "@/lib/google";
-import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
-import type { classroom_v1 } from "googleapis";
+} from '@/lib/google';
+import type { classroom_v1 } from 'googleapis';
+import { getServerSession } from 'next-auth';
+import { NextResponse } from 'next/server';
 
 // Helper function to safely convert Google API string values that can be null to undefined
 function convertNullToUndefined(
@@ -80,14 +80,14 @@ export type DashboardCourse = {
   description?: string;
   room?: string;
   alternateLink?: string;
-  role: "teacher" | "student";
+  role: 'teacher' | 'student';
   courseWork: CourseWorkWithSubmissions[];
   totalAssignments: number;
   completedAssignments: number;
   pendingAssignments: number;
 };
 
-export type DashboardData = {
+export type UserInfo = {
   teacherCourses: DashboardCourse[];
   studentCourses: DashboardCourse[];
   totalCourses: number;
@@ -100,13 +100,13 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const accessToken = session.accessToken;
     if (!accessToken) {
       return NextResponse.json(
-        { error: "Missing Google access token in session" },
+        { error: 'Missing Google access token in session' },
         { status: 400 }
       );
     }
@@ -114,7 +114,7 @@ export async function GET() {
     const userEmail = session.user?.id;
     if (!userEmail) {
       return NextResponse.json(
-        { error: "Missing user email in session" },
+        { error: 'Missing user email in session' },
         { status: 400 }
       );
     }
@@ -146,27 +146,27 @@ export async function GET() {
             // Count submissions by state
             const totalSubmissions = allSubmissions.length;
             const turnedInSubmissions = allSubmissions.filter(
-              (s) => s.state === "TURNED_IN" || s.state === "RETURNED"
+              s => s.state === 'TURNED_IN' || s.state === 'RETURNED'
             ).length;
             const gradedSubmissions = allSubmissions.filter(
-              (s) => s.state === "RETURNED"
+              s => s.state === 'RETURNED'
             ).length;
 
             // Find user's submission if they are a student
             let userSubmission = undefined;
-            if (course.role === "student") {
+            if (course.role === 'student') {
               // Get all students to find the user's ID
               const students = await getStudents(course.id);
-              const currentUser = students.find((s) => s.email === userEmail);
+              const currentUser = students.find(s => s.email === userEmail);
 
               if (currentUser) {
                 const userSub = allSubmissions.find(
-                  (s) => s.userId === currentUser.userId
+                  s => s.userId === currentUser.userId
                 );
                 if (userSub) {
                   // Convert submission history to match our type definition
                   const convertedSubmissionHistory =
-                    userSub.submissionHistory?.map((history) => ({
+                    userSub.submissionHistory?.map(history => ({
                       stateHistory: history.stateHistory
                         ? {
                             state: convertNullToUndefined(
@@ -183,8 +183,8 @@ export async function GET() {
                     })) || undefined;
 
                   userSubmission = {
-                    id: userSub.id || "",
-                    state: userSub.state || "NEW",
+                    id: userSub.id || '',
+                    state: userSub.state || 'NEW',
                     updateTime: userSub.updateTime || undefined,
                     submissionHistory: convertedSubmissionHistory,
                   };
@@ -194,7 +194,7 @@ export async function GET() {
 
             courseWorkWithSubmissions.push({
               id: work.id,
-              title: work.title || "Tarea sin título",
+              title: work.title || 'Tarea sin título',
               description: work.description || undefined,
               materials: work.materials || undefined,
               state: work.state || undefined,
@@ -229,12 +229,12 @@ export async function GET() {
         let completedAssignments = 0;
         let pendingAssignments = 0;
 
-        if (course.role === "student") {
+        if (course.role === 'student') {
           completedAssignments = courseWorkWithSubmissions.filter(
-            (cw) =>
+            cw =>
               cw.userSubmission &&
-              (cw.userSubmission.state === "TURNED_IN" ||
-                cw.userSubmission.state === "RETURNED")
+              (cw.userSubmission.state === 'TURNED_IN' ||
+                cw.userSubmission.state === 'RETURNED')
           ).length;
           pendingAssignments = totalAssignments - completedAssignments;
         } else {
@@ -262,7 +262,7 @@ export async function GET() {
           pendingAssignments,
         };
 
-        if (course.role === "teacher") {
+        if (course.role === 'teacher') {
           teacherCourses.push(dashboardCourse);
         } else {
           studentCourses.push(dashboardCourse);
@@ -288,7 +288,7 @@ export async function GET() {
       0
     );
 
-    const dashboardData: DashboardData = {
+    const dashboardData: UserInfo = {
       teacherCourses,
       studentCourses,
       totalCourses,
@@ -299,7 +299,7 @@ export async function GET() {
 
     return NextResponse.json(dashboardData);
   } catch (error: unknown) {
-    console.error("/api/dashboard error:", error);
+    console.error('/api/dashboard error:', error);
     return createErrorResponse(error as Error, 500, true);
   }
 }

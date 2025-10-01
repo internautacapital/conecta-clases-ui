@@ -1,29 +1,29 @@
-"use client"
+'use client';
 
-import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
-import { useClientOnly } from "./useClientOnly"
+import { useClientOnly } from '@/hooks/useClientOnly';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export function usePageLoader() {
-  const [loading, setLoading] = useState(false)
-  const isClient = useClientOnly()
-  const pathname = usePathname()
+  const [loading, setLoading] = useState(false);
+  const isClient = useClientOnly();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (!isClient) return
-    
+    if (!isClient) return;
+
     // Start loading
-    setLoading(true)
-    
+    setLoading(true);
+
     // Set a minimum timeout of 1 second
     const timer = setTimeout(() => {
-      setLoading(false)
-    }, 1000) // Minimum 1 second loading time
+      setLoading(false);
+    }, 1000); // Minimum 1 second loading time
 
     return () => {
-      clearTimeout(timer)
-    }
-  }, [isClient, pathname])
+      clearTimeout(timer);
+    };
+  }, [isClient, pathname]);
 
-  return loading
+  return loading;
 }
