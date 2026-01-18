@@ -1,5 +1,6 @@
 import { MyCourses } from '@/features/teacher/components/Dashboard';
 import { PendingTasksView } from '@/features/teacher/components/PendingTasksView';
+import { StudentProgressView } from '@/features/teacher/components/StudentProgressView';
 import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
@@ -35,6 +36,7 @@ export default async function TeacherPage() {
   return (
     <div className='max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8'>
       <MyCourses />
+      <StudentProgressView />
       <PendingTasksView />
     </div>
   );
