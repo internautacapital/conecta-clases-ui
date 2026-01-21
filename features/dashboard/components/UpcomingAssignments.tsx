@@ -85,14 +85,16 @@ export function UpcomingAssignments({ assignments }: Props) {
     return 'text-green-700';
   };
 
-  const formatDueDate = (dueDate?: string) => {
-    if (!dueDate || !isClient) return 'Sin fecha';
+  const formatDateTime = (dateStr?: string) => {
+    if (!dateStr || !isClient) return undefined;
 
-    const date = new Date(dueDate);
-    return date.toLocaleDateString('es-ES', {
-      weekday: 'short',
+    const d = new Date(dateStr);
+    return d.toLocaleString('es-ES', {
+      year: 'numeric',
       month: 'short',
       day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -152,16 +154,28 @@ export function UpcomingAssignments({ assignments }: Props) {
                         assignment?.submissionState
                       )}
                     </div>
+                    {assignment.comment && (
+                      <p className='text-gray-700 text-sm mb-2 line-clamp-3'>
+                        {assignment.comment}
+                      </p>
+                    )}
                     <div className='flex items-center justify-between'>
-                      <span className='text-xs text-gray-500'>
-                        {formatDueDate(assignment.dueDate)}
-                      </span>
                       <span
                         className={`text-xs font-medium ${getUrgencyTextColor(daysUntilDue, assignment.status)}`}
                       >
                         {getUrgencyText(daysUntilDue, assignment.status)}
                       </span>
                     </div>
+                    {assignment.submissionDate && (
+                      <div className='mt-2'>
+                        <span className='text-xs text-gray-500'>
+                          Última actualización:{' '}
+                        </span>
+                        <span className='text-xs text-gray-700 font-medium'>
+                          {formatDateTime(assignment.submissionDate)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className='mt-4 md:mt-0 '>
                     {assignment.alternateLink ? (

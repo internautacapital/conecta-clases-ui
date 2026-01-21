@@ -15,6 +15,10 @@ export type Assignment = {
   status: 'pending' | 'submitted' | 'late';
   submissionState?: string;
   alternateLink?: string;
+  // Optional teacher comment or coursework description
+  comment?: string;
+  // If the student submission has an update time (when it was submitted/updated)
+  submissionDate?: string;
 };
 
 export type CourseProgress = {
@@ -213,6 +217,10 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
             status: assignmentStatus,
             submissionState: userSubmission?.state || 'NEW',
             alternateLink: work.alternateLink || undefined,
+            // Use coursework description as a teacher comment if available
+            comment: work.description || undefined,
+            // Use submission updateTime as a submission date if available
+            submissionDate: userSubmission?.updateTime || undefined,
           });
         }
       } catch (error) {
