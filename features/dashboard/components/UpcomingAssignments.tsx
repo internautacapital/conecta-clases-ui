@@ -1,7 +1,9 @@
 'use client';
 
+import React from 'react';
 import type { Assignment } from '@/features/dashboard/services/studentDashboardService';
 import { useClientOnly } from '@/hooks/useClientOnly';
+import { classifyTask, getTaskClassificationInfo } from '@/config/topicConfig';
 
 type Props = {
   assignments: Assignment[];
@@ -73,6 +75,89 @@ export function UpcomingAssignments({ assignments }: Props) {
     );
   };
 
+  const getFeedbackBadge = (feedback?: Assignment['feedback']) => {
+    if (!feedback?.feedbackAvailable) return null;
+
+    if (feedback.hasGrade) {
+      return (
+        <span
+          className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
+          title={`Calificación: ${feedback.assignedGrade}/100`}
+        >
+          📊 {feedback.assignedGrade}/100
+        </span>
+      );
+    }
+
+    if (feedback.needsAttention) {
+      return (
+        <span
+          className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800'
+          title='Tarea devuelta - Ver comentarios en Classroom'
+        >
+          💬 Ver feedback
+        </span>
+      );
+    }
+
+    if (feedback.isReturned) {
+      return (
+        <span
+          className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800'
+          title='Tarea devuelta por el profesor'
+        >
+          ↩️ Devuelta
+        </span>
+      );
+    }
+
+    return null;
+  };
+
+  // Nueva función para clasificar tareas por nombre y topic
+  const getTaskClassificationBadge = (assignment: Assignment) => {
+    const classificationInfo = getTaskClassificationInfo(
+      assignment.title,
+      assignment.topicName
+    );
+
+    const { type, badge } = classificationInfo;
+
+    if (type === 'unknown') {
+      // Si no se puede clasificar, mostrar el topic si existe
+      if (assignment.topicName) {
+        const truncatedName =
+          assignment.topicName.length > 15
+            ? assignment.topicName.substring(0, 15) + '...'
+            : assignment.topicName;
+
+        return (
+          <span
+            className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800'
+            title={`Topic: ${assignment.topicName}`}
+          >
+            📂 {truncatedName}
+          </span>
+        );
+      }
+      return null;
+    }
+
+    const colorClasses = {
+      obligatory: 'bg-red-100 text-red-800 border-red-200',
+      optional: 'bg-gray-100 text-gray-800 border-gray-200',
+    }[type];
+
+    return (
+      <span
+        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${colorClasses}`}
+        title={`${badge?.text} - Clasificado por: ${classificationInfo.source === 'topic' ? 'topic' : 'nombre de tarea'}`}
+      >
+        {badge?.emoji} {badge?.text}
+      </span>
+    );
+  };
+
   const getUrgencyTextColor = (
     daysUntilDue: number | null,
     status: 'pending' | 'submitted' | 'late'
@@ -102,6 +187,36 @@ export function UpcomingAssignments({ assignments }: Props) {
   const completedCount = assignments.filter(
     a => a.status === 'submitted'
   ).length;
+  const feedbackCount = assignments.filter(
+    a => a.feedback?.feedbackAvailable
+  ).length;
+
+  // Contadores por clasificación de tarea
+  const obligatoryCount = assignments.filter(
+    a => classifyTask(a.title, a.topicName) === 'obligatory'
+  ).length;
+  const optionalCount = assignments.filter(
+    a => classifyTask(a.title, a.topicName) === 'optional'
+  ).length;
+
+  // Debug: mostrar clasificaciones en consola
+  React.useEffect(() => {
+    if (assignments.length > 0) {
+      console.log('=== CLASIFICACIÓN DE TAREAS ===');
+      assignments.forEach(assignment => {
+        const classification = classifyTask(
+          assignment.title,
+          assignment.topicName
+        );
+        console.log(
+          `"${assignment.title}" (Topic: "${assignment.topicName || 'N/A'}") -> ${classification}`
+        );
+      });
+      console.log(
+        `Total: ${assignments.length} | Obligatorias: ${obligatoryCount} | Opcionales: ${optionalCount}`
+      );
+    }
+  }, [assignments, obligatoryCount, optionalCount]);
 
   return (
     <div className='bg-white rounded-lg shadow-sm border p-6'>
@@ -116,6 +231,21 @@ export function UpcomingAssignments({ assignments }: Props) {
           {completedCount > 0 && (
             <span className='bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
               {completedCount} completadas
+            </span>
+          )}
+          {feedbackCount > 0 && (
+            <span className='bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
+              {feedbackCount} con feedback
+            </span>
+          )}
+          {obligatoryCount > 0 && (
+            <span className='bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
+              🔴 {obligatoryCount} obligatorias
+            </span>
+          )}
+          {optionalCount > 0 && (
+            <span className='bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
+              ⚪ {optionalCount} opcionales
             </span>
           )}
         </div>
@@ -143,7 +273,7 @@ export function UpcomingAssignments({ assignments }: Props) {
                     <h3 className='font-medium text-gray-900 text-sm mb-1'>
                       {assignment.title}
                     </h3>
-                    <div className='flex items-center gap-2 mb-2'>
+                    <div className='flex items-center gap-2 mb-2 flex-wrap'>
                       <p className='text-gray-600 text-xs'>
                         {assignment.courseName}
                       </p>
@@ -151,6 +281,8 @@ export function UpcomingAssignments({ assignments }: Props) {
                         assignment.status,
                         assignment?.submissionState
                       )}
+                      {getFeedbackBadge(assignment.feedback)}
+                      {getTaskClassificationBadge(assignment)}
                     </div>
                     <div className='flex items-center justify-between'>
                       <span className='text-xs text-gray-500'>
@@ -169,9 +301,19 @@ export function UpcomingAssignments({ assignments }: Props) {
                         href={assignment.alternateLink}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='inline-flex items-center px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded-full hover:bg-blue-700 transition-colors'
+                        className={`inline-flex items-center px-3 py-1 text-white text-xs font-medium rounded-full transition-colors ${
+                          assignment.feedback?.needsAttention
+                            ? 'bg-orange-600 hover:bg-orange-700'
+                            : assignment.feedback?.hasGrade
+                              ? 'bg-green-600 hover:bg-green-700'
+                              : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
                       >
-                        Ir a tarea
+                        {assignment.feedback?.needsAttention
+                          ? '💬 Ver feedback'
+                          : assignment.feedback?.hasGrade
+                            ? '📊 Ver calificación'
+                            : 'Ir a tarea'}
                       </a>
                     ) : (
                       <span className='inline-flex items-center px-3 py-1 bg-gray-400 text-white text-xs font-medium rounded-full cursor-not-allowed'>

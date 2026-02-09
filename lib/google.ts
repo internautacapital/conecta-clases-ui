@@ -42,6 +42,13 @@ export type SubmissionHistory = {
   stateHistory?: StateHistory | null;
 };
 
+export type SubmissionComment = {
+  id?: string | null;
+  authorId?: string | null;
+  creationTime?: string | null;
+  comment?: string | null;
+};
+
 export type StudentSubmission = {
   id?: string | null;
   userId?: string | null;
@@ -62,6 +69,7 @@ export type StudentSubmission = {
   updateTime?: string | null;
   late?: boolean | null;
   submissionHistory?: SubmissionHistory[] | null;
+  comments?: SubmissionComment[] | null;
 };
 
 export async function getAnnouncements(
@@ -328,6 +336,179 @@ export type CourseWithRole = {
   calendarId?: string;
   role: 'teacher' | 'student';
 };
+
+export async function getSubmissionComments(
+  courseId: string,
+  courseWorkId: string,
+  submissionId: string
+): Promise<SubmissionComment[]> {
+  requireAuth();
+  const classroom = getClassroom();
+
+  try {
+    // NOTA: La Google Classroom API no expone comentarios privados directamente
+    // Los comentarios entre profesor-estudiante no están disponibles via API REST
+    // Esta función está preparada para futuras actualizaciones de la API
+
+    const res = await classroom.courses.courseWork.studentSubmissions.get({
+      courseId,
+      courseWorkId,
+      id: submissionId,
+    });
+
+    const submission = res.data;
+    if (!submission) return [];
+
+    // Por ahora, retornamos un array vacío ya que los comentarios privados
+    // no están disponibles en la API actual de Google Classroom
+    const comments: SubmissionComment[] = [];
+
+    // Si en el futuro Google añade soporte para comentarios,
+    // la implementación iría aquí
+
+    return comments;
+  } catch (error) {
+    console.error('Failed to get submission comments:', error);
+    return [];
+  }
+}
+
+export async function getStudentSubmissionWithComments(
+  courseId: string,
+  courseWorkId: string,
+  submissionId: string
+): Promise<StudentSubmission | null> {
+  requireAuth();
+  const classroom = getClassroom();
+
+  try {
+    const res = await classroom.courses.courseWork.studentSubmissions.get({
+      courseId,
+      courseWorkId,
+      id: submissionId,
+    });
+
+    const sub = res.data;
+    if (!sub) return null;
+
+    // Get comments for this submission (actualmente vacío debido a limitaciones de la API)
+    const comments = await getSubmissionComments(
+      courseId,
+      courseWorkId,
+      submissionId
+    );
+
+    // Process submission history
+    const submissionHistory =
+      sub.submissionHistory?.map(history => ({
+        stateHistory: history.stateHistory
+          ? {
+              state: convertNullToUndefined(history.stateHistory.state),
+              stateTimestamp: convertNullToUndefined(
+                history.stateHistory.stateTimestamp
+              ),
+              actorUserId: convertNullToUndefined(
+                history.stateHistory.actorUserId
+              ),
+            }
+          : null,
+      })) || null;
+
+    return {
+      id: convertNullToUndefined(sub.id),
+      userId: convertNullToUndefined(sub.userId),
+      courseId,
+      courseWorkId,
+      state: (sub.state || 'NEW') as
+        | 'SUBMISSION_STATE_UNSPECIFIED'
+        | 'NEW'
+        | 'CREATED'
+        | 'TURNED_IN'
+        | 'RETURNED'
+        | 'RECLAIMED_BY_STUDENT'
+        | string,
+      assignedGrade: sub.assignedGrade ?? undefined,
+      draftGrade: sub.draftGrade ?? undefined,
+      alternateLink: convertNullToUndefined(sub.alternateLink),
+      creationTime: convertNullToUndefined(sub.creationTime),
+      updateTime: convertNullToUndefined(sub.updateTime),
+      late: sub.late ?? undefined,
+      submissionHistory,
+      comments,
+    };
+  } catch (error) {
+    console.error('Failed to get student submission with comments:', error);
+    return null;
+  }
+}
+
+/**
+ * Obtiene información detallada de feedback disponible para una submission
+ * Incluye toda la información de feedback que la API permite acceder
+ */
+export async function getSubmissionFeedback(
+  courseId: string,
+  courseWorkId: string,
+  submissionId: string
+): Promise<{
+  hasGrade: boolean;
+  assignedGrade?: number;
+  draftGrade?: number;
+  isReturned: boolean;
+  returnTime?: string;
+  lastUpdateTime?: string;
+  feedbackAvailable: boolean;
+}> {
+  requireAuth();
+  const classroom = getClassroom();
+
+  try {
+    const res = await classroom.courses.courseWork.studentSubmissions.get({
+      courseId,
+      courseWorkId,
+      id: submissionId,
+    });
+
+    const sub = res.data;
+    if (!sub) {
+      return {
+        hasGrade: false,
+        isReturned: false,
+        feedbackAvailable: false,
+      };
+    }
+
+    const hasGrade =
+      sub.assignedGrade !== null && sub.assignedGrade !== undefined;
+    const isReturned = sub.state === 'RETURNED';
+
+    // Buscar el timestamp de cuando fue devuelto
+    let returnTime: string | undefined;
+    if (sub.submissionHistory) {
+      const returnedEntry = sub.submissionHistory
+        .reverse() // Más reciente primero
+        .find(history => history.stateHistory?.state === 'RETURNED');
+      returnTime = returnedEntry?.stateHistory?.stateTimestamp || undefined;
+    }
+
+    return {
+      hasGrade,
+      assignedGrade: sub.assignedGrade ?? undefined,
+      draftGrade: sub.draftGrade ?? undefined,
+      isReturned,
+      returnTime: convertNullToUndefined(returnTime),
+      lastUpdateTime: convertNullToUndefined(sub.updateTime),
+      feedbackAvailable: hasGrade || isReturned,
+    };
+  } catch (error) {
+    console.error('Failed to get submission feedback:', error);
+    return {
+      hasGrade: false,
+      isReturned: false,
+      feedbackAvailable: false,
+    };
+  }
+}
 
 export async function getCoursesWithRoles(
   userEmail: string
