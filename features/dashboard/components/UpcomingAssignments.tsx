@@ -1,7 +1,9 @@
 'use client';
 
+import React from 'react';
 import type { Assignment } from '@/features/dashboard/services/studentDashboardService';
 import { useClientOnly } from '@/hooks/useClientOnly';
+import { classifyTask, getTaskClassificationInfo } from '@/config/topicConfig';
 
 type Props = {
   assignments: Assignment[];
@@ -112,6 +114,50 @@ export function UpcomingAssignments({ assignments }: Props) {
     return null;
   };
 
+  // Nueva función para clasificar tareas por nombre y topic
+  const getTaskClassificationBadge = (assignment: Assignment) => {
+    const classificationInfo = getTaskClassificationInfo(
+      assignment.title,
+      assignment.topicName
+    );
+
+    const { type, badge } = classificationInfo;
+
+    if (type === 'unknown') {
+      // Si no se puede clasificar, mostrar el topic si existe
+      if (assignment.topicName) {
+        const truncatedName =
+          assignment.topicName.length > 15
+            ? assignment.topicName.substring(0, 15) + '...'
+            : assignment.topicName;
+
+        return (
+          <span
+            className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800'
+            title={`Topic: ${assignment.topicName}`}
+          >
+            📂 {truncatedName}
+          </span>
+        );
+      }
+      return null;
+    }
+
+    const colorClasses = {
+      obligatory: 'bg-red-100 text-red-800 border-red-200',
+      optional: 'bg-gray-100 text-gray-800 border-gray-200',
+    }[type];
+
+    return (
+      <span
+        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${colorClasses}`}
+        title={`${badge?.text} - Clasificado por: ${classificationInfo.source === 'topic' ? 'topic' : 'nombre de tarea'}`}
+      >
+        {badge?.emoji} {badge?.text}
+      </span>
+    );
+  };
+
   const getUrgencyTextColor = (
     daysUntilDue: number | null,
     status: 'pending' | 'submitted' | 'late'
@@ -145,6 +191,33 @@ export function UpcomingAssignments({ assignments }: Props) {
     a => a.feedback?.feedbackAvailable
   ).length;
 
+  // Contadores por clasificación de tarea
+  const obligatoryCount = assignments.filter(
+    a => classifyTask(a.title, a.topicName) === 'obligatory'
+  ).length;
+  const optionalCount = assignments.filter(
+    a => classifyTask(a.title, a.topicName) === 'optional'
+  ).length;
+
+  // Debug: mostrar clasificaciones en consola
+  React.useEffect(() => {
+    if (assignments.length > 0) {
+      console.log('=== CLASIFICACIÓN DE TAREAS ===');
+      assignments.forEach(assignment => {
+        const classification = classifyTask(
+          assignment.title,
+          assignment.topicName
+        );
+        console.log(
+          `"${assignment.title}" (Topic: "${assignment.topicName || 'N/A'}") -> ${classification}`
+        );
+      });
+      console.log(
+        `Total: ${assignments.length} | Obligatorias: ${obligatoryCount} | Opcionales: ${optionalCount}`
+      );
+    }
+  }, [assignments, obligatoryCount, optionalCount]);
+
   return (
     <div className='bg-white rounded-lg shadow-sm border p-6'>
       <div className='flex items-center justify-between mb-4 flex-wrap flex-col md:flex-row items-start'>
@@ -163,6 +236,16 @@ export function UpcomingAssignments({ assignments }: Props) {
           {feedbackCount > 0 && (
             <span className='bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
               {feedbackCount} con feedback
+            </span>
+          )}
+          {obligatoryCount > 0 && (
+            <span className='bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
+              🔴 {obligatoryCount} obligatorias
+            </span>
+          )}
+          {optionalCount > 0 && (
+            <span className='bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
+              ⚪ {optionalCount} opcionales
             </span>
           )}
         </div>
@@ -199,6 +282,7 @@ export function UpcomingAssignments({ assignments }: Props) {
                         assignment?.submissionState
                       )}
                       {getFeedbackBadge(assignment.feedback)}
+                      {getTaskClassificationBadge(assignment)}
                     </div>
                     <div className='flex items-center justify-between'>
                       <span className='text-xs text-gray-500'>

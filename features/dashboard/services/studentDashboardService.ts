@@ -16,6 +16,8 @@ export type Assignment = {
   status: 'pending' | 'submitted' | 'late';
   submissionState?: string;
   alternateLink?: string;
+  topicId?: string;
+  topicName?: string;
   feedback?: {
     hasGrade: boolean;
     assignedGrade?: number;
