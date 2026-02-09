@@ -3,6 +3,7 @@ import {
   getCourseWork,
   getCurrentUserProfile,
   getStudentSubmissions,
+  getSubmissionFeedback,
   type StudentSubmission,
 } from '@/lib/google';
 
@@ -15,6 +16,14 @@ export type Assignment = {
   status: 'pending' | 'submitted' | 'late';
   submissionState?: string;
   alternateLink?: string;
+  feedback?: {
+    hasGrade: boolean;
+    assignedGrade?: number;
+    isReturned: boolean;
+    returnTime?: string;
+    feedbackAvailable: boolean;
+    needsAttention: boolean;
+  };
 };
 
 export type CourseProgress = {
@@ -198,6 +207,28 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
 
           const assignmentStatus = getAssignmentStatus(userSubmission);
 
+          // Get feedback information if submission exists
+          let feedback = undefined;
+          if (userSubmission?.id) {
+            try {
+              const feedbackData = await getSubmissionFeedback(
+                course.id,
+                work.id,
+                userSubmission.id
+              );
+              feedback = {
+                ...feedbackData,
+                needsAttention:
+                  feedbackData.isReturned && !feedbackData.hasGrade,
+              };
+            } catch (error) {
+              console.warn(
+                `Failed to get feedback for assignment ${work.id}:`,
+                error
+              );
+            }
+          }
+
           // Include all assignments (both pending and completed) to show full status
           upcomingAssignments.push({
             id: work.id,
@@ -213,6 +244,7 @@ export async function getStudentDashboardData(): Promise<StudentDashboardData> {
             status: assignmentStatus,
             submissionState: userSubmission?.state || 'NEW',
             alternateLink: work.alternateLink || undefined,
+            feedback,
           });
         }
       } catch (error) {

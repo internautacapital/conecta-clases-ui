@@ -73,6 +73,45 @@ export function UpcomingAssignments({ assignments }: Props) {
     );
   };
 
+  const getFeedbackBadge = (feedback?: Assignment['feedback']) => {
+    if (!feedback?.feedbackAvailable) return null;
+
+    if (feedback.hasGrade) {
+      return (
+        <span
+          className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
+          title={`Calificación: ${feedback.assignedGrade}/100`}
+        >
+          📊 {feedback.assignedGrade}/100
+        </span>
+      );
+    }
+
+    if (feedback.needsAttention) {
+      return (
+        <span
+          className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800'
+          title='Tarea devuelta - Ver comentarios en Classroom'
+        >
+          💬 Ver feedback
+        </span>
+      );
+    }
+
+    if (feedback.isReturned) {
+      return (
+        <span
+          className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800'
+          title='Tarea devuelta por el profesor'
+        >
+          ↩️ Devuelta
+        </span>
+      );
+    }
+
+    return null;
+  };
+
   const getUrgencyTextColor = (
     daysUntilDue: number | null,
     status: 'pending' | 'submitted' | 'late'
@@ -102,6 +141,9 @@ export function UpcomingAssignments({ assignments }: Props) {
   const completedCount = assignments.filter(
     a => a.status === 'submitted'
   ).length;
+  const feedbackCount = assignments.filter(
+    a => a.feedback?.feedbackAvailable
+  ).length;
 
   return (
     <div className='bg-white rounded-lg shadow-sm border p-6'>
@@ -116,6 +158,11 @@ export function UpcomingAssignments({ assignments }: Props) {
           {completedCount > 0 && (
             <span className='bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
               {completedCount} completadas
+            </span>
+          )}
+          {feedbackCount > 0 && (
+            <span className='bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
+              {feedbackCount} con feedback
             </span>
           )}
         </div>
@@ -143,7 +190,7 @@ export function UpcomingAssignments({ assignments }: Props) {
                     <h3 className='font-medium text-gray-900 text-sm mb-1'>
                       {assignment.title}
                     </h3>
-                    <div className='flex items-center gap-2 mb-2'>
+                    <div className='flex items-center gap-2 mb-2 flex-wrap'>
                       <p className='text-gray-600 text-xs'>
                         {assignment.courseName}
                       </p>
@@ -151,6 +198,7 @@ export function UpcomingAssignments({ assignments }: Props) {
                         assignment.status,
                         assignment?.submissionState
                       )}
+                      {getFeedbackBadge(assignment.feedback)}
                     </div>
                     <div className='flex items-center justify-between'>
                       <span className='text-xs text-gray-500'>
@@ -169,9 +217,19 @@ export function UpcomingAssignments({ assignments }: Props) {
                         href={assignment.alternateLink}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='inline-flex items-center px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded-full hover:bg-blue-700 transition-colors'
+                        className={`inline-flex items-center px-3 py-1 text-white text-xs font-medium rounded-full transition-colors ${
+                          assignment.feedback?.needsAttention
+                            ? 'bg-orange-600 hover:bg-orange-700'
+                            : assignment.feedback?.hasGrade
+                              ? 'bg-green-600 hover:bg-green-700'
+                              : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
                       >
-                        Ir a tarea
+                        {assignment.feedback?.needsAttention
+                          ? '💬 Ver feedback'
+                          : assignment.feedback?.hasGrade
+                            ? '📊 Ver calificación'
+                            : 'Ir a tarea'}
                       </a>
                     ) : (
                       <span className='inline-flex items-center px-3 py-1 bg-gray-400 text-white text-xs font-medium rounded-full cursor-not-allowed'>
